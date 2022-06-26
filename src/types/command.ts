@@ -6,5 +6,5 @@ export interface EcCommand {
   description: string,
   category: string,
   data: SlashCommandBuilder,
-  execute(interaction: CommandInteraction): void;
+  execute(interaction: CommandInteraction, guildId: string): void;
 }

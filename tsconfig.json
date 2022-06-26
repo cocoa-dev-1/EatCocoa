@@ -3,14 +3,8 @@
     "module": "CommonJS", // required
     "target": "ES2015", // required
     "noImplicitAny": true,
-    "sourceMap": true,
     "strict": true,
     "outDir": "build",
-    "emitDecoratorMetadata": true, // required
-    "experimentalDecorators": true, // required
-    "declaration": false,
-    "importHelpers": true, // required
-    "forceConsistentCasingInFileNames": true,
     "esModuleInterop": true,
     "allowJs": true
   },
