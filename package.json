@@ -29,6 +29,9 @@
     "moment": "^2.29.3",
     "moment-timezone": "^0.5.34",
     "mysql2": "^2.3.3",
-    "typeorm": "^0.3.6"
+    "typedi": "^0.10.0",
+    "typeorm": "^0.3.6",
+    "winston": "^3.8.0",
+    "winston-daily-rotate-file": "^4.7.1"
   }
 }

@@ -1,11 +1,11 @@
-import { Client } from "discord.js";
+import { Client, Message } from "discord.js";
 import { EcEvent } from "../types/event";
 import { logger } from "../utils/logger";
 
 export const messageCreate: EcEvent = {
   name: "messageCreate",
   once: false,
-  async execute(client: Client) {
+  async execute(message: Message) {
     logger.log("messageCreate");
   }
 }

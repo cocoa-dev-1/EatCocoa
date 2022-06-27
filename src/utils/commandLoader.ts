@@ -3,8 +3,8 @@ import { RESTPostAPIApplicationCommandsJSONBody, Routes } from "discord-api-type
 import { allCommands } from "../commands";
 import { logger } from "./logger";
 
-const commands: RESTPostAPIApplicationCommandsJSONBody[] = [
-  ...allCommands.map(command => command.data.toJSON())
+export const commands: RESTPostAPIApplicationCommandsJSONBody[] = [
+  ...allCommands.map(command => command.data)
 ];
 
 export const loadCommands = async () => {
@@ -26,7 +26,7 @@ export const loadCommands = async () => {
 			Routes.applicationCommands(process.env.CLIENT_ID),
 			{ body: commands },
 		);
-
+		
 		logger.success('Successfully reloaded application (/) commands.');
 	} catch (error) {
 		logger.error("Failed to reload application (/) commands.");
