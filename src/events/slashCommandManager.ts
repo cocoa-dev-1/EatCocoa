@@ -4,7 +4,7 @@ import { EcEvent } from "../types/event";
 import { logger } from "../utils/logger";
 import { winstonLogger } from "../utils/winston";
 
-export const interactionCreate: EcEvent = {
+export const slashCommandManager: EcEvent = {
   name: "interactionCreate",
   once: false,
   async execute(interaction: Interaction) {

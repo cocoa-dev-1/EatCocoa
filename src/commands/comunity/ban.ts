@@ -1,32 +1,45 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction, MessageEmbed } from "discord.js";
+import { CommandInteraction } from "discord.js";
 import { Container } from "typedi";
 import { BanManager } from "../../services/BanManager";
 import { CommandCategory, CommandPermission } from "../../types/command";
 import { EcCommand } from "../../types/command";
-import { DiscordColor, DiscordPermission } from "../../types/discord";
-import { defaultImage } from "../../utils/asset";
 import { logger } from "../../utils/logger";
 import { winstonLogger } from "../../utils/winston";
 
 export const banCommand: EcCommand = {
-  name: "ban",
+  name: "밴",
   description: "서버에서 유저를 밴합니다.",
-  category: CommandCategory.ADMIN,
+  category: CommandCategory.get("ADMIN").value,
   data: new SlashCommandBuilder()
-    .setName("ban")
-    .setDescription("서버에서 유저를 밴합니다.")
+    .setName("밴")
+    .setDescription("서버에서 유저를 차단합니다.")
     .setDefaultMemberPermissions(CommandPermission.ADMIN)
     .addUserOption((option) => 
       option.setName("유저")
-        .setDescription("밴할 유저를 선택하세요.")
+        .setDescription("차단할 유저를 선택하세요.")
         .setRequired(true)
     )
     .toJSON(),
   async execute(interaction: CommandInteraction, guildId: string|null) {
-    if (interaction.options.getUser("유저").id === interaction.guild.ownerId) {
-      return await interaction.reply("서버주인은 밴을 할 수 없습니다.");
+    const banManager = Container.get(BanManager);
+    try {
+      const targetUser = banManager.getUser(interaction);
+      if (targetUser.id === interaction.guild.ownerId) {
+        await banManager.Error(interaction, `<@${targetUser.id}> 님은 차단이 불가능합니다.`);
+        return;
+      }
+
+      if (banManager.canBan(interaction, targetUser)) {
+        await banManager.ban(interaction, targetUser);
+      } else {
+        await banManager.Error(interaction, `<@${targetUser.id}> 님은 차단이 불가능합니다.`);
+      }
+    } catch(error) {
+      await banManager.Error(interaction, "알 수 없는 에러가 발생하였습니다.");
+      winstonLogger.error(error);
+      logger.error("ban 커맨드를 실행하던도중 에러가 발생하였습니다.");
     }
-    await Container.get(BanManager).banUser(interaction);
+    // await Container.get(BanManager).banUser(interaction);
   }
 }

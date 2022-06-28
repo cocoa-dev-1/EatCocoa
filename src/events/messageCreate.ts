@@ -6,6 +6,6 @@ export const messageCreate: EcEvent = {
   name: "messageCreate",
   once: false,
   async execute(message: Message) {
-    logger.log("messageCreate");
+    
   }
 }

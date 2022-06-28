@@ -1,8 +1,10 @@
 import { EcEvent } from "../types/event";
-import { interactionCreate } from "./interactionCreate";
+import { slashCommandManager } from "./slashCommandManager";
 import { messageCreate } from "./messageCreate";
+import { helpCommandManager } from "./helpCommandManager";
 
 export const allEvents: EcEvent[] = [
-  interactionCreate,
+  slashCommandManager,
+  helpCommandManager,
   messageCreate
 ]
