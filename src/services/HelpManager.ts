@@ -80,12 +80,19 @@ export class HelpManager {
 
   createHelpFields(selectedOption: string): EmbedFieldData[] {
     const commandsByOption = allCommands.filter((command) => command.category === selectedOption);
-    return commandsByOption.map((command) => {
+    const helpFields = commandsByOption.map((command) => {
       return {
         name: `/${command.name}`,
         value: command.description,
         inline: true
       };
     });
+    if (helpFields.length === 0) {
+      return [{
+        name: "명령어가 아직 없습니다.",
+        value: "null"
+      }]
+    }
+    return helpFields;
   }
 }

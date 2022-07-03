@@ -9,7 +9,7 @@ import { winstonLogger } from "../../utils/winston";
 
 export const banCommand: EcCommand = {
   name: "밴",
-  description: "서버에서 유저를 밴합니다.",
+  description: "유저를 차단합니다.",
   category: CommandCategory.get("ADMIN").value,
   data: new SlashCommandBuilder()
     .setName("밴")
