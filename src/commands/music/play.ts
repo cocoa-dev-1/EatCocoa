@@ -1,5 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction } from "discord.js";
+import { Container } from "typedi";
+import { GuildVoiceManager } from "../../services/GuildVoiceManager";
 import {
   CommandCategory,
   EcCommand,
@@ -21,13 +23,19 @@ export const playCommand: EcCommand = {
     interaction: EcCommandInteraction,
     guildId: string
   ): Promise<void> {
-    const url = interaction.options.get("url");
+    const guildVoiceManager = Container.get(GuildVoiceManager);
+    const url = interaction.options.getString("url");
     if (url) {
-      const { music } = interaction.client;
-      let musicPlayer = music.getPlayer(guildId);
-      if (!musicPlayer) {
-        musicPlayer = music.newPlayer(guildId);
+      const canPlay = await guildVoiceManager.check(interaction, guildId);
+      if (canPlay) {
+        const musicPlayer = await guildVoiceManager.getPlayer(
+          interaction,
+          guildId
+        );
+        await guildVoiceManager.play(interaction, musicPlayer, url);
       }
+    } else {
+      guildVoiceManager.Error(interaction, "url을 찾지 못했습니다.");
     }
   },
 };

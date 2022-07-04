@@ -1,5 +1,6 @@
 import { Collection } from "discord.js";
 import { Player } from "./Player";
+import { createAudioPlayer } from "@discordjs/voice";
 
 export class Manager {
   players: Collection<string, Player>;
@@ -20,6 +21,16 @@ export class Manager {
   async hasPlayer(guildId: string): Promise<boolean> {
     const player = this.getPlayer(guildId);
     if (player) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  async removePlayer(guildId: string): Promise<boolean> {
+    const player = this.getPlayer(guildId);
+    if (player) {
+      this.players.delete(guildId);
       return true;
     } else {
       return false;
