@@ -3,7 +3,8 @@ import { Collection, CommandInteraction } from "discord.js";
 import Container from "typedi";
 import { HelpManager } from "../services/helpManager";
 import { CommandCategory, EcCommand } from "../types/command";
-import { comunityCommands } from "./comunity";
+import { adminCommands } from "./admin";
+import { mainCommands } from "./main";
 import { musicCommands } from "./music";
 
 export const helpCommand: EcCommand = {
@@ -16,14 +17,15 @@ export const helpCommand: EcCommand = {
     .toJSON(),
   async execute(interaction: CommandInteraction, guildId: string) {
     await Container.get(HelpManager).createHelpMessage(interaction);
-  }
-}
+  },
+};
 
 export const allCommands: EcCommand[] = [
-  ...comunityCommands,
+  ...adminCommands,
   ...musicCommands,
-  helpCommand
-]
+  ...mainCommands,
+  helpCommand,
+];
 
 export const commandCollection = new Collection<string, EcCommand>();
 

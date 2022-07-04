@@ -15,31 +15,38 @@ export const banCommand: EcCommand = {
     .setName("밴")
     .setDescription("서버에서 유저를 차단합니다.")
     .setDefaultMemberPermissions(CommandPermission.ADMIN)
-    .addUserOption((option) => 
-      option.setName("유저")
+    .addUserOption((option) =>
+      option
+        .setName("유저")
         .setDescription("차단할 유저를 선택하세요.")
         .setRequired(true)
     )
     .toJSON(),
-  async execute(interaction: CommandInteraction, guildId: string|null) {
+  async execute(interaction: CommandInteraction, guildId: string | null) {
     const banManager = Container.get(BanManager);
     try {
       const targetUser = banManager.getUser(interaction);
-      if (targetUser.id === interaction.guild.ownerId) {
-        await banManager.Error(interaction, `<@${targetUser.id}> 님은 차단이 불가능합니다.`);
+      if (targetUser.id === interaction.guild?.ownerId) {
+        await banManager.Error(
+          interaction,
+          `<@${targetUser.id}> 님은 차단이 불가능합니다.`
+        );
         return;
       }
 
       if (banManager.canBan(interaction, targetUser)) {
         await banManager.ban(interaction, targetUser);
       } else {
-        await banManager.Error(interaction, `<@${targetUser.id}> 님은 차단이 불가능합니다.`);
+        await banManager.Error(
+          interaction,
+          `<@${targetUser.id}> 님은 차단이 불가능합니다.`
+        );
       }
-    } catch(error) {
+    } catch (error) {
       await banManager.Error(interaction, "알 수 없는 에러가 발생하였습니다.");
       winstonLogger.error(error);
       logger.error("ban 커맨드를 실행하던도중 에러가 발생하였습니다.");
     }
     // await Container.get(BanManager).banUser(interaction);
-  }
-}
+  },
+};

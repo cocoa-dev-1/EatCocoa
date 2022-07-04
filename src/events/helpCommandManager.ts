@@ -1,6 +1,5 @@
-import { Interaction, MessageComponentInteraction, MessageSelectMenu, SelectMenuInteraction } from "discord.js";
+import { SelectMenuInteraction } from "discord.js";
 import Container from "typedi";
-import { commandCollection } from "../commands";
 import { HelpManager } from "../services/helpManager";
 import { EcEvent } from "../types/event";
 
@@ -13,5 +12,5 @@ export const helpCommandManager: EcEvent = {
         await Container.get(HelpManager).updateHelpMessage(interaction);
       }
     }
-  }
-}
+  },
+};
