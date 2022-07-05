@@ -1,6 +1,7 @@
 import { Collection } from "discord.js";
 import { Player } from "./Player";
 import { createAudioPlayer } from "@discordjs/voice";
+import { PlayerOption } from "../types/player";
 
 export class Manager {
   players: Collection<string, Player>;
@@ -8,8 +9,11 @@ export class Manager {
     this.players = new Collection<string, Player>();
   }
 
-  async newPlayer(guildId: string): Promise<Player> | null {
-    const player = new Player();
+  async newPlayer(
+    guildId: string,
+    option: PlayerOption
+  ): Promise<Player> | null {
+    const player = new Player(option);
     this.players.set(guildId, player);
     return player;
   }

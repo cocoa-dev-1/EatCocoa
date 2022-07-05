@@ -35,7 +35,6 @@
     "typeorm": "^0.3.6",
     "winston": "^3.8.0",
     "winston-daily-rotate-file": "^4.7.1",
-    "youtube-dl-exec": "^2.0.12",
     "ytdl-core": "^4.11.0",
     "ytpl": "^2.3.0",
     "ytsr": "^3.8.0"

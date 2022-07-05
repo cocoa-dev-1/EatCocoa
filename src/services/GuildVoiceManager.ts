@@ -16,7 +16,9 @@ export class GuildVoiceManager {
     const { music } = interaction.client;
     let musicPlayer = music.getPlayer(guildId);
     if (!musicPlayer) {
-      musicPlayer = music.newPlayer(guildId);
+      musicPlayer = music.newPlayer(guildId, {
+        textChannel: interaction.channel,
+      });
     }
     return musicPlayer;
   }
@@ -79,9 +81,23 @@ export class GuildVoiceManager {
   ) {
     const validatedUrl = this.ytManager.validate(url);
     if (validatedUrl) {
-      const channel = await this.getUserVoiceChannel(interaction);
-      const connection = await musicPlayer.connect(channel);
+      const isList = this.ytManager.listCheck(url);
+      if (isList) {
+        const playList = await this.ytManager.getPlayList(url);
+        await musicPlayer.addList(playList);
+      } else {
+        const video = await this.ytManager.getVideoInfo(url);
+        const videoDetails = video.videoDetails;
+        await musicPlayer.add(videoDetails);
+      }
+    } else {
+      const videos = await this.ytManager.search(url);
+      if (!videos.length) {
+        return await this.Error(interaction, "곡을 찾지 못했습니다.");
+      }
     }
+    const voiceChannel = await this.getUserVoiceChannel(interaction);
+    const connection = await musicPlayer.connect(voiceChannel);
   }
 
   async Error(interaction: EcCommandInteraction, msg: string) {
