@@ -1,14 +1,12 @@
 import { Service } from "typedi";
 import ytpl, { Item, Result } from "ytpl";
 import ytdl from "ytdl-core";
-import ytsr, { Item as SrItem } from "ytsr";
+import ytsr, { Item as SrItem, Video } from "ytsr";
 import { PlayerItem } from "../types/player";
 
 @Service()
 export class YtManager {
   constructor() {}
-
-  async getVideo() {}
 
   validate(url: string): boolean {
     return ytdl.validateURL(url);

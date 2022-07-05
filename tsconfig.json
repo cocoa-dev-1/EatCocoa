@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "CommonJS", // required
     "target": "ES2015", // required
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "strict": false,
     "outDir": "build",
     "esModuleInterop": true,

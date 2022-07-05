@@ -6,17 +6,21 @@ import { EcCommandInteraction } from "../types/command";
 import { DiscordColor } from "../types/discord";
 import { defaultImage } from "../utils/asset";
 import { YtManager } from "./YtManager";
+import { Video } from "ytsr";
+import { Manager } from "../structures/Manager";
 
 @Service()
 export class GuildVoiceManager {
   ytManager: YtManager;
-  constructor() {}
+  constructor() {
+    this.ytManager = new YtManager();
+  }
 
   async getPlayer(interaction: EcCommandInteraction, guildId: string) {
     const { music } = interaction.client;
-    let musicPlayer = music.getPlayer(guildId);
-    if (!musicPlayer) {
-      musicPlayer = music.newPlayer(guildId, {
+    let musicPlayer = await music.getPlayer(guildId);
+    if (musicPlayer === undefined) {
+      musicPlayer = await music.newPlayer(guildId, {
         textChannel: interaction.channel,
       });
     }
@@ -88,16 +92,53 @@ export class GuildVoiceManager {
       } else {
         const video = await this.ytManager.getVideoInfo(url);
         const videoDetails = video.videoDetails;
-        await musicPlayer.add(videoDetails);
+        await musicPlayer.add({
+          id: videoDetails.videoId,
+          title: videoDetails.title,
+          thumbnail: videoDetails.thumbnails[0],
+          url: videoDetails.video_url,
+        });
+        // await musicPlayer.add(videoDetails);
       }
     } else {
       const videos = await this.ytManager.search(url);
       if (!videos.length) {
         return await this.Error(interaction, "곡을 찾지 못했습니다.");
       }
+      if (videos[0].type === "video") {
+        await musicPlayer.add({
+          id: videos[0].id,
+          title: videos[0].title,
+          thumbnail: videos[0].bestThumbnail,
+          url: videos[0].url,
+        });
+      } else {
+        return await this.Error(interaction, "곡을 찾지 못했습니다.");
+      }
     }
-    const voiceChannel = await this.getUserVoiceChannel(interaction);
-    const connection = await musicPlayer.connect(voiceChannel);
+    await this.Success(interaction, musicPlayer);
+    if (!musicPlayer.playing) {
+      const voiceChannel = await this.getUserVoiceChannel(interaction);
+      await musicPlayer.connect(voiceChannel);
+      await musicPlayer.play();
+    }
+  }
+
+  async Success(interaction: EcCommandInteraction, musicPlayer: Player) {
+    const music = musicPlayer.queue[musicPlayer.queue.length - 1];
+    const embed = new MessageEmbed({
+      title: "노래를 추가했습니다!",
+      description: music.title,
+      image: music.thumbnail,
+      timestamp: new Date(),
+      footer: {
+        text: "코코아 봇",
+        iconURL: defaultImage,
+      },
+    });
+    await interaction.reply({
+      embeds: [embed],
+    });
   }
 
   async Error(interaction: EcCommandInteraction, msg: string) {

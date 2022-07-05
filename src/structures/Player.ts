@@ -7,16 +7,28 @@ import {
   VoiceBasedChannel,
 } from "discord.js";
 import { Item, Result } from "ytpl";
-import { MoreVideoDetails, thumbnail } from "ytdl-core";
+import { thumbnail } from "ytdl-core";
 import { title } from "process";
 import { defaultImage } from "../utils/asset";
+import {
+  createAudioPlayer,
+  createAudioResource,
+  demuxProbe,
+  entersState,
+  joinVoiceChannel,
+  VoiceConnection,
+  VoiceConnectionStatus,
+} from "@discordjs/voice";
+import { logger } from "../utils/logger";
+import playdl from "play-dl";
 
 export class Player {
-  private queue: PlayerItem[];
+  public queue: PlayerItem[];
   public playing: boolean;
   public voiceChannel: VoiceBasedChannel;
   public textChannel: GuildTextBasedChannel;
-  public current: Item;
+  public current: PlayerItem;
+  public connection: VoiceConnection;
 
   constructor(option?: PlayerOption) {
     this.queue = [];
@@ -24,26 +36,48 @@ export class Player {
     this.voiceChannel = option?.voiceChannel || null;
     this.textChannel = option.textChannel;
     this.current = null;
+    this.connection = null;
   }
 
-  async play() {}
+  async play() {
+    if (this.queue.length > 0) {
+      this.current = this.queue.shift();
+      const readableStream = await playdl.stream(this.current.url, {
+        discordPlayerCompatibility: true,
+      });
+      const player = createAudioPlayer();
+      const { stream, type } = await demuxProbe(readableStream.stream);
+      const resource = createAudioResource(stream, { inputType: type });
+      this.connection.subscribe(player);
+      this.playing = true;
+      player.play(resource);
+    } else {
+    }
+  }
+
+  async stop() {
+    this.connection.destroy();
+    this.queue = [];
+    this.current = null;
+  }
 
   async connect(channel: VoiceBasedChannel) {
     this.voiceChannel = channel;
+    this.connection = joinVoiceChannel({
+      channelId: this.voiceChannel.id,
+      guildId: this.voiceChannel.guild.id,
+      adapterCreator: this.voiceChannel.guild.voiceAdapterCreator,
+    });
+    this.bindConnectionEvent();
   }
 
-  async add(videoDetails: MoreVideoDetails) {
+  async add(videoDetails: PlayerItem) {
     this.queue.push({
-      id: videoDetails.videoId,
+      id: videoDetails.id,
       title: videoDetails.title,
-      thumbnail: {
-        url: videoDetails.thumbnails[0].url,
-        height: videoDetails.thumbnails[0].height,
-        width: videoDetails.thumbnails[0].width,
-      },
-      url: videoDetails.video_url,
+      thumbnail: videoDetails.thumbnail,
+      url: videoDetails.url,
     });
-    await this.sendAddedSong("노래가", title, videoDetails.thumbnails[0]);
   }
 
   async addList(videos: Result) {
@@ -59,25 +93,29 @@ export class Player {
         url: videoDetails.url,
       });
     });
-    await this.sendAddedSong("재생 목록이", videos.title, videos.bestThumbnail);
   }
 
-  async sendAddedSong(name: string, song: string, thumbnail: thumbnail) {
-    const embed = new MessageEmbed({
-      title: `${name} 추가되었습니다.`,
-      description: song,
-      image: {
-        url: thumbnail.url,
-        height: thumbnail.height,
-        width: thumbnail.width,
-      },
-      footer: {
-        text: "코코아 봇",
-        iconURL: defaultImage,
-      },
-    });
-    await this.textChannel.send({
-      embeds: [embed],
-    });
+  bindConnectionEvent() {
+    if (this.connection) {
+      this.connection.on(VoiceConnectionStatus.Ready, this.onReady);
+      this.connection.on(VoiceConnectionStatus.Destroyed, this.onDisconnected);
+    }
+  }
+
+  onReady() {
+    logger.log(`Player Ready.`);
+  }
+
+  async onDisconnected(oldState, newState) {
+    try {
+      await Promise.race([
+        entersState(this.connection, VoiceConnectionStatus.Signalling, 5_000),
+        entersState(this.connection, VoiceConnectionStatus.Connecting, 5_000),
+      ]);
+      // Seems to be reconnecting to a new channel - ignore disconnect
+    } catch (error) {
+      // Seems to be a real disconnect which SHOULDN'T be recovered from
+      this.connection.destroy();
+    }
   }
 }
