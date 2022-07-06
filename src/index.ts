@@ -10,7 +10,7 @@ import { EatCocoa } from "./structures/Client";
 import { loadManager } from "./loader/managerLoader";
 moment.tz.setDefault("Asia/Seoul");
 
-const client = new EatCocoa({
+export const client = new EatCocoa({
   intents: new Intents(32757),
 });
 

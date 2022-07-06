@@ -1,4 +1,4 @@
-import { Guild, MessageEmbed, VoiceBasedChannel } from "discord.js";
+import { Guild, Message, MessageEmbed, VoiceBasedChannel } from "discord.js";
 import { getVoiceConnection } from "@discordjs/voice";
 import { Service } from "typedi";
 import { Player } from "../structures/Player";
@@ -16,13 +16,21 @@ export class GuildVoiceManager {
     this.ytManager = new YtManager();
   }
 
-  async getPlayer(interaction: EcCommandInteraction, guildId: string) {
+  async getPlayer(
+    interaction: EcCommandInteraction,
+    guildId: string,
+    create?: boolean
+  ) {
     const { music } = interaction.client;
     let musicPlayer = await music.getPlayer(guildId);
     if (musicPlayer === undefined) {
-      musicPlayer = await music.newPlayer(guildId, {
-        textChannel: interaction.channel,
-      });
+      if (create) {
+        musicPlayer = await music.newPlayer(guildId, {
+          textChannel: interaction.channel,
+        });
+      } else {
+        return null;
+      }
     }
     return musicPlayer;
   }
@@ -116,7 +124,7 @@ export class GuildVoiceManager {
         return await this.Error(interaction, "곡을 찾지 못했습니다.");
       }
     }
-    await this.Success(interaction, musicPlayer);
+    await this.playSuccess(interaction, musicPlayer);
     if (!musicPlayer.playing) {
       const voiceChannel = await this.getUserVoiceChannel(interaction);
       await musicPlayer.connect(voiceChannel);
@@ -124,7 +132,77 @@ export class GuildVoiceManager {
     }
   }
 
-  async Success(interaction: EcCommandInteraction, musicPlayer: Player) {
+  async pause(interaction: EcCommandInteraction) {
+    const musicPlayer = await this.getPlayer(interaction, interaction.guild.id);
+    if (musicPlayer?.playing) {
+      const pause = await musicPlayer.pause();
+      if (pause) {
+        await this.pauseSuccess(interaction, "pause");
+      } else {
+        await this.Error(interaction, "노래를 일시정지 하지 못했습니다.");
+      }
+    } else {
+      const resume = await musicPlayer.resume();
+      if (resume) {
+        await this.pauseSuccess(interaction, "resume");
+      } else {
+        await this.Error(interaction, "노래를 재생 하지 못했습니다.");
+      }
+    }
+  }
+
+  async skip(interaction: EcCommandInteraction) {
+    const musicPlayer = await this.getPlayer(interaction, interaction.guild.id);
+    const currentSong = musicPlayer.current.title;
+    if (musicPlayer) {
+      const skip = await musicPlayer.skip();
+      if (skip) {
+        await this.skipSuccess(interaction, currentSong);
+      } else {
+        await this.Error(interaction, "노래를 스킵 하지 못했습니다.");
+      }
+    }
+  }
+
+  async skipSuccess(interaction: EcCommandInteraction, name: string) {
+    const embed = new MessageEmbed({
+      title: "노래를 스킵했습니다.",
+      description: name,
+      timestamp: new Date(),
+      footer: {
+        text: "코코아 봇",
+        iconURL: defaultImage,
+      },
+    });
+    await interaction.editReply({
+      embeds: [embed],
+    });
+  }
+
+  async pauseSuccess(
+    interaction: EcCommandInteraction,
+    type: "pause" | "resume"
+  ) {
+    let title = "";
+    if (type === "pause") {
+      title = "노래를 일시정지 했습니다.";
+    } else if (type === "resume") {
+      title = "노래를 다시 재생합니다.";
+    }
+    const embed = new MessageEmbed({
+      title: title,
+      timestamp: new Date(),
+      footer: {
+        text: "코코아 봇",
+        iconURL: defaultImage,
+      },
+    });
+    await interaction.editReply({
+      embeds: [embed],
+    });
+  }
+
+  async playSuccess(interaction: EcCommandInteraction, musicPlayer: Player) {
     const music = musicPlayer.queue[musicPlayer.queue.length - 1];
     const embed = new MessageEmbed({
       title: "노래를 추가했습니다!",
@@ -136,7 +214,7 @@ export class GuildVoiceManager {
         iconURL: defaultImage,
       },
     });
-    await interaction.reply({
+    await interaction.editReply({
       embeds: [embed],
     });
   }
@@ -152,7 +230,7 @@ export class GuildVoiceManager {
         iconURL: defaultImage,
       },
     });
-    await interaction.reply({
+    await interaction.editReply({
       embeds: [embed],
     });
   }

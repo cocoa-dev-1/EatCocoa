@@ -23,6 +23,7 @@ export const playCommand: EcCommand = {
     interaction: EcCommandInteraction,
     guildId: string
   ): Promise<void> {
+    await interaction.deferReply();
     const guildVoiceManager = Container.get(GuildVoiceManager);
     const url = interaction.options.getString("url");
     if (url) {
@@ -30,7 +31,8 @@ export const playCommand: EcCommand = {
       if (canPlay) {
         const musicPlayer = await guildVoiceManager.getPlayer(
           interaction,
-          guildId
+          guildId,
+          true
         );
         await guildVoiceManager.play(interaction, musicPlayer, url);
       }
