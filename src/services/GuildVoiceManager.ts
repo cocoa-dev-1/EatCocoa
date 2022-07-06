@@ -1,12 +1,20 @@
-import { Guild, Message, MessageEmbed, VoiceBasedChannel } from "discord.js";
+import {
+  Guild,
+  Message,
+  MessageActionRow,
+  MessageEmbed,
+  MessageSelectMenu,
+  MessageSelectOptionData,
+  VoiceBasedChannel,
+} from "discord.js";
 import { getVoiceConnection } from "@discordjs/voice";
 import { Service } from "typedi";
 import { Player } from "../structures/Player";
-import { EcCommandInteraction } from "../types/command";
+import { EcCommand, EcCommandInteraction } from "../types/command";
 import { DiscordColor } from "../types/discord";
 import { defaultImage } from "../utils/asset";
 import { YtManager } from "./YtManager";
-import { Video } from "ytsr";
+import { Item, Video } from "ytsr";
 import { Manager } from "../structures/Manager";
 
 @Service()
@@ -164,10 +172,80 @@ export class GuildVoiceManager {
     }
   }
 
-  async skipSuccess(interaction: EcCommandInteraction, name: string) {
+  async search(interaction: EcCommandInteraction) {
+    const song = interaction.options.getString("song");
+    const result = await this.ytManager.search(song);
+    const resultActionList = new MessageActionRow().addComponents(
+      new MessageSelectMenu()
+        .setCustomId("search")
+        .setPlaceholder("노래를 선택하세요.")
+        .addOptions(this.createResultOptions(result))
+    );
+    const embed = new MessageEmbed({
+      title: "노래를 선택하세요",
+      description: "30초 안에 선택해야합니다",
+      timestamp: new Date(),
+      footer: {
+        text: "코코아 봇",
+        iconURL: defaultImage,
+      },
+    });
+    await interaction.editReply({
+      embeds: [embed],
+      components: [resultActionList],
+    });
+    //await this.createActionList(result);
+  }
+
+  createResultOptions(result: Item[]): MessageSelectOptionData[] {
+    const resultOptions = result.map((element) => {
+      if (element.type === "video") {
+        return {
+          label: element.title,
+          description: element.description,
+          value: element.url,
+        };
+      }
+    });
+    return resultOptions;
+  }
+
+  async loop(interaction: EcCommandInteraction) {
+    const musicPlayer = await this.getPlayer(interaction, interaction.guild.id);
+    if (musicPlayer) {
+      const loopResult = musicPlayer.loop();
+      if (loopResult) {
+        await this.loopSuccess(
+          interaction,
+          "플레이 리스트 루프가 설정 되었습니다."
+        );
+      } else {
+        await this.loopSuccess(
+          interaction,
+          "플레이 리스트 루프가 설정해제 되었습니다."
+        );
+      }
+    }
+  }
+
+  async loopSuccess(interaction: EcCommandInteraction, msg: string) {
+    const embed = new MessageEmbed({
+      title: msg,
+      timestamp: new Date(),
+      footer: {
+        text: "코코아 봇",
+        iconURL: defaultImage,
+      },
+    });
+    await interaction.editReply({
+      embeds: [embed],
+    });
+  }
+
+  async skipSuccess(interaction: EcCommandInteraction, msg: string) {
     const embed = new MessageEmbed({
       title: "노래를 스킵했습니다.",
-      description: name,
+      description: msg,
       timestamp: new Date(),
       footer: {
         text: "코코아 봇",

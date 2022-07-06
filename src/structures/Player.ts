@@ -31,11 +31,13 @@ export class Player {
   public playing: boolean;
   public voiceChannel: VoiceBasedChannel;
   public textChannel: GuildTextBasedChannel;
+  public position: number;
   public current: PlayerItem;
   public connection: VoiceConnection;
   private player: AudioPlayer;
   private currentResource: AudioResource;
   private subscription: PlayerSubscription;
+  private endless: boolean;
 
   constructor(option?: PlayerOption) {
     this.queue = [];
@@ -47,35 +49,45 @@ export class Player {
     this.connection = null;
     this.player = null;
     this.subscription = null;
+    this.position = 0;
+    this.endless = false;
   }
 
   async play() {
-    if (this.queue.length > 0) {
-      this.current = this.queue.shift();
-      const readableStream = await playdl.stream(this.current.url, {
-        discordPlayerCompatibility: true,
-      });
-      this.player = createAudioPlayer({
-        behaviors: {
-          noSubscriber: NoSubscriberBehavior.Pause,
-        },
-      });
-      const { stream, type } = await demuxProbe(readableStream.stream);
-      const resource = createAudioResource(stream, { inputType: type });
-      this.subscription = this.connection.subscribe(this.player);
-      this.playing = true;
-      this.player.play(resource);
-      this.currentResource = resource;
-      this.bindPlayerEvnet();
+    this.current = this.getCurrentQueue(0);
+    const readableStream = await playdl.stream(this.current.url, {
+      discordPlayerCompatibility: true,
+    });
+    this.player = createAudioPlayer({
+      behaviors: {
+        noSubscriber: NoSubscriberBehavior.Pause,
+      },
+    });
+    const { stream, type } = await demuxProbe(readableStream.stream);
+    const resource = createAudioResource(stream, { inputType: type });
+    this.subscription = this.connection.subscribe(this.player);
+    this.playing = true;
+    this.player.play(resource);
+    this.currentResource = resource;
+    this.bindPlayerEvnet();
+  }
+
+  getCurrentQueue(position: number) {
+    return this.queue[position];
+  }
+
+  setNextPosition() {
+    if (this.endless) {
+      this.position = this.queue.length % (this.position + 1);
     } else {
-      // await this.sendMessage(this.textChannel, "재생할 노래가 없습니다.");
-      await this.stop();
+      this.position = this.position + 1;
     }
   }
 
   async nextQueue() {
-    if (this.queue.length > 0) {
-      this.current = this.queue.shift();
+    if (this.queue.length - 1 > this.position || this.endless) {
+      this.setNextPosition();
+      this.current = this.getCurrentQueue(this.position);
       const readableStream = await playdl.stream(this.current.url, {
         discordPlayerCompatibility: true,
       });
@@ -122,6 +134,11 @@ export class Player {
     } else {
       return false;
     }
+  }
+
+  loop() {
+    this.endless = !this.endless;
+    return this.endless;
   }
 
   async stop() {
@@ -198,14 +215,14 @@ export class Player {
   }
 
   async onPlayerError(player: Player, error) {
-    console.error(
+    winstonLogger.error(error);
+    logger.error(
       `Error: ${error.message} with resource ${error.resource.metadata.title}`
     );
     await player.sendMessage(
       player.textChannel,
       `${error.resource.metadata.title} 에서 오류가 발생해 다음곡을 재생합니다.`
     );
-    winstonLogger.error(error);
     await player.nextQueue();
   }
 
@@ -214,7 +231,7 @@ export class Player {
   }
 
   onPlayerStateChange(oldState, newState) {
-    console.log(
+    logger.log(
       `Audio player transitioned from ${oldState.status} to ${newState.status}`
     );
   }
