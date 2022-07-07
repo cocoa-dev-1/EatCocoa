@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { Collection, CommandInteraction } from "discord.js";
 import Container from "typedi";
-import { HelpManager } from "../services/helpManager";
+import { HelpManager } from "../services/HelpManager";
 import { CommandCategory, EcCommand } from "../types/command";
 import { adminCommands } from "./admin";
 import { mainCommands } from "./main";

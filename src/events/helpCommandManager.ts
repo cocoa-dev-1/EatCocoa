@@ -1,6 +1,6 @@
 import { SelectMenuInteraction } from "discord.js";
 import Container from "typedi";
-import { HelpManager } from "../services/helpManager";
+import { HelpManager } from "../services/HelpManager";
 import { EcEvent } from "../types/event";
 
 export const helpCommandManager: EcEvent = {
