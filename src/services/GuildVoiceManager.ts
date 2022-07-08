@@ -302,11 +302,13 @@ export class GuildVoiceManager {
   createResultOptions(result: Item[]): MessageSelectOptionData[] {
     const resultOptions = result.map((element) => {
       if (element.type === "video") {
-        return {
-          label: element.title,
-          description: element.description,
-          value: element.url,
-        };
+        if (element.title !== undefined || element.title !== null) {
+          return {
+            label: element.title,
+            description: element.description,
+            value: element.url,
+          };
+        }
       }
     });
     return resultOptions;
