@@ -281,7 +281,7 @@ export class GuildVoiceManager {
       new MessageSelectMenu()
         .setCustomId("search")
         .setPlaceholder("노래를 선택하세요.")
-        .addOptions(this.createResultOptions(result))
+        .addOptions(await this.createResultOptions(result))
     );
     const embed = new MessageEmbed({
       title: "노래를 선택하세요",
@@ -299,7 +299,7 @@ export class GuildVoiceManager {
     //await this.createActionList(result);
   }
 
-  createResultOptions(result: Item[]): MessageSelectOptionData[] {
+  async createResultOptions(result: Item[]): Promise<MessageSelectOptionData[]> {
     const resultOptions = result.map((element) => {
       if (element.type === "video") {
         if (element.title !== undefined || element.title !== null) {
@@ -312,6 +312,7 @@ export class GuildVoiceManager {
       }
     });
     const finalResult = resultOptions.filter((data) => data !== undefined);
+    console.log(finalResult)
     return finalResult;
   }
 

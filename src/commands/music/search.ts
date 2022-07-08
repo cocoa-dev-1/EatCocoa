@@ -55,6 +55,7 @@ export const searchCommand: EcCommand = {
             musicPlayer,
             selectedOption
           );
+          collector.stop();
         }
       });
     }
