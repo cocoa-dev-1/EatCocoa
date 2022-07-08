@@ -312,7 +312,6 @@ export class GuildVoiceManager {
       }
     });
     const finalResult = resultOptions.filter((data) => data !== undefined);
-    console.log(finalResult)
     return finalResult;
   }
 
