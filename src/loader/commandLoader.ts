@@ -5,6 +5,7 @@ import {
 } from "discord-api-types/v10";
 import { allCommands } from "../commands";
 import { logger } from "../utils/logger";
+import { winstonLogger } from "../utils/winston";
 
 export const commands: RESTPostAPIApplicationCommandsJSONBody[] = [
   ...allCommands.map((command) => command.data),
@@ -31,6 +32,7 @@ export const loadCommands = async () => {
 
     logger.success("Successfully reloaded application (/) commands.");
   } catch (error) {
+    winstonLogger.error(error);
     logger.error("Failed to reload application (/) commands.");
   }
 };

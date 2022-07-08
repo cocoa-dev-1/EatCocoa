@@ -190,6 +190,10 @@ export class Player {
     });
   }
 
+  getRemainingQueue() {
+    return this.queue.slice(this.position);
+  }
+
   bindPlayerEvnet() {
     if (this.player) {
       this.player.on(AudioPlayerStatus.Idle, async (oldState, newState) => {

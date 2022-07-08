@@ -15,13 +15,21 @@ import { DiscordColor } from "../types/discord";
 import { defaultImage } from "../utils/asset";
 import { YtManager } from "./YtManager";
 import { Item, Video } from "ytsr";
+import { Result } from "ytpl";
 import { Manager } from "../structures/Manager";
+import { title } from "process";
 
 @Service()
 export class GuildVoiceManager {
   ytManager: YtManager;
   constructor() {
     this.ytManager = new YtManager();
+  }
+
+  async hasPlayer(interaction: EcCommandInteraction) {
+    const { music } = interaction.client;
+    const checkPlayer = await music.hasPlayer(interaction.guild.id);
+    return checkPlayer;
   }
 
   async getPlayer(
@@ -100,6 +108,7 @@ export class GuildVoiceManager {
     url: string
   ) {
     const validatedUrl = this.ytManager.validate(url);
+    const isList = this.ytManager.listCheck(url);
     if (validatedUrl) {
       const isList = this.ytManager.listCheck(url);
       if (isList) {
@@ -132,12 +141,67 @@ export class GuildVoiceManager {
         return await this.Error(interaction, "곡을 찾지 못했습니다.");
       }
     }
-    await this.playSuccess(interaction, musicPlayer);
+    if (isList) {
+      await this.playSuccess(
+        interaction,
+        musicPlayer,
+        await this.ytManager.getPlayList(url)
+      );
+    } else {
+      await this.playSuccess(interaction, musicPlayer);
+    }
     if (!musicPlayer.playing) {
       const voiceChannel = await this.getUserVoiceChannel(interaction);
       await musicPlayer.connect(voiceChannel);
       await musicPlayer.play();
     }
+  }
+
+  async playSuccess(
+    interaction: EcCommandInteraction,
+    musicPlayer: Player,
+    list?: Result
+  ) {
+    const music = musicPlayer.queue[musicPlayer.queue.length - 1];
+    let title = list ? "플레이 리스트를 추가했습니다." : "노래를 추가했습니다.";
+    let description = list?.title || music.title;
+    let thumbnail = list?.bestThumbnail || music.thumbnail;
+    const embed = new MessageEmbed({
+      title: title,
+      description: description,
+      image: thumbnail,
+      timestamp: new Date(),
+      footer: {
+        text: "코코아 봇",
+        iconURL: defaultImage,
+      },
+    });
+    await interaction.editReply({
+      embeds: [embed],
+    });
+  }
+
+  async stop(interaction: EcCommandInteraction, musicPlayer: Player) {
+    if (musicPlayer.playing || musicPlayer.queue.length > 0) {
+      await musicPlayer.stop();
+      await this.stopSuccess(interaction, "노래 재생을 종료했습니다.");
+    } else {
+      await this.Error(interaction, "재생중인 곡이 없습니다.");
+    }
+  }
+
+  async stopSuccess(interaction: EcCommandInteraction, msg: string) {
+    const embed = new MessageEmbed({
+      title: msg,
+      timestamp: new Date(),
+      footer: {
+        text: "코코아 봇",
+        iconURL: defaultImage,
+      },
+    });
+    await interaction.editReply({
+      embeds: [embed],
+    });
   }
 
   async pause(interaction: EcCommandInteraction) {
@@ -159,6 +223,29 @@ export class GuildVoiceManager {
     }
   }
 
+  async pauseSuccess(
+    interaction: EcCommandInteraction,
+    type: "pause" | "resume"
+  ) {
+    let title = "";
+    if (type === "pause") {
+      title = "노래를 일시정지 했습니다.";
+    } else if (type === "resume") {
+      title = "노래를 다시 재생합니다.";
+    }
+    const embed = new MessageEmbed({
+      title: title,
+      timestamp: new Date(),
+      footer: {
+        text: "코코아 봇",
+        iconURL: defaultImage,
+      },
+    });
+    await interaction.editReply({
+      embeds: [embed],
+    });
+  }
+
   async skip(interaction: EcCommandInteraction) {
     const musicPlayer = await this.getPlayer(interaction, interaction.guild.id);
     const currentSong = musicPlayer.current.title;
@@ -170,6 +257,21 @@ export class GuildVoiceManager {
         await this.Error(interaction, "노래를 스킵 하지 못했습니다.");
       }
     }
+  }
+
+  async skipSuccess(interaction: EcCommandInteraction, msg: string) {
+    const embed = new MessageEmbed({
+      title: "노래를 스킵했습니다.",
+      description: msg,
+      timestamp: new Date(),
+      footer: {
+        text: "코코아 봇",
+        iconURL: defaultImage,
+      },
+    });
+    await interaction.editReply({
+      embeds: [embed],
+    });
   }
 
   async search(interaction: EcCommandInteraction) {
@@ -231,61 +333,6 @@ export class GuildVoiceManager {
   async loopSuccess(interaction: EcCommandInteraction, msg: string) {
     const embed = new MessageEmbed({
       title: msg,
-      timestamp: new Date(),
-      footer: {
-        text: "코코아 봇",
-        iconURL: defaultImage,
-      },
-    });
-    await interaction.editReply({
-      embeds: [embed],
-    });
-  }
-
-  async skipSuccess(interaction: EcCommandInteraction, msg: string) {
-    const embed = new MessageEmbed({
-      title: "노래를 스킵했습니다.",
-      description: msg,
-      timestamp: new Date(),
-      footer: {
-        text: "코코아 봇",
-        iconURL: defaultImage,
-      },
-    });
-    await interaction.editReply({
-      embeds: [embed],
-    });
-  }
-
-  async pauseSuccess(
-    interaction: EcCommandInteraction,
-    type: "pause" | "resume"
-  ) {
-    let title = "";
-    if (type === "pause") {
-      title = "노래를 일시정지 했습니다.";
-    } else if (type === "resume") {
-      title = "노래를 다시 재생합니다.";
-    }
-    const embed = new MessageEmbed({
-      title: title,
-      timestamp: new Date(),
-      footer: {
-        text: "코코아 봇",
-        iconURL: defaultImage,
-      },
-    });
-    await interaction.editReply({
-      embeds: [embed],
-    });
-  }
-
-  async playSuccess(interaction: EcCommandInteraction, musicPlayer: Player) {
-    const music = musicPlayer.queue[musicPlayer.queue.length - 1];
-    const embed = new MessageEmbed({
-      title: "노래를 추가했습니다!",
-      description: music.title,
-      image: music.thumbnail,
       timestamp: new Date(),
       footer: {
         text: "코코아 봇",

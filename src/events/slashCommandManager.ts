@@ -18,7 +18,20 @@ export const slashCommandManager: EcEvent = {
       } catch (error) {
         winstonLogger.error(error);
         logger.error("Error while executing command: " + command.name);
+        if (interaction.replied) {
+          await interaction.editReply({
+            content: "Error while executing command: " + command.name,
+            embeds: [],
+            components: [],
+          });
+        } else {
+          await interaction.reply({
+            content: "Error while executing command: " + command.name,
+            embeds: [],
+            components: [],
+          });
+        }
       }
     }
-  }
-}
+  },
+};

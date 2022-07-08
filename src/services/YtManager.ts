@@ -19,7 +19,7 @@ export class YtManager {
     }
   }
   async getPlayList(url: string): Promise<Result> {
-    const playlist = await ytpl(url.split("list=")[1]);
+    const playlist = await ytpl(url);
     return playlist;
   }
 
