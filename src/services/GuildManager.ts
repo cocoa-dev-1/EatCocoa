@@ -92,7 +92,7 @@ export class GuildManager {
         iconURL: defaultImage,
       },
     });
-    await interaction.reply({
+    await interaction.editReply({
       embeds: [embed],
     });
   }
@@ -108,7 +108,7 @@ export class GuildManager {
         iconURL: defaultImage,
       },
     });
-    await interaction.reply({
+    await interaction.editReply({
       embeds: [embed],
     });
   }
@@ -124,7 +124,7 @@ export class GuildManager {
         iconURL: defaultImage,
       },
     });
-    await interaction.reply({
+    await interaction.editReply({
       embeds: [embed],
     });
   }

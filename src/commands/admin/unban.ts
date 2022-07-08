@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction } from "discord.js";
 import Container from "typedi";
-import { BanManager } from "../../services/BanManager";
+import { GuildManager } from "../../services/GuildManager";
 import {
   CommandCategory,
   CommandPermission,
@@ -26,7 +26,8 @@ export const unbanCommand: EcCommand = {
     )
     .toJSON(),
   async execute(interaction: CommandInteraction, guildId: string | null) {
-    const banManager = Container.get(BanManager);
+    await interaction.deferReply();
+    const banManager = Container.get(GuildManager);
 
     try {
       const targetUser = banManager.getBanUser(interaction);

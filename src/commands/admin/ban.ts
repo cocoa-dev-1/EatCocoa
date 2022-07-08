@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { CommandInteraction } from "discord.js";
 import { Container } from "typedi";
-import { BanManager } from "../../services/BanManager";
+import { GuildManager } from "../../services/GuildManager";
 import { CommandCategory, CommandPermission } from "../../types/command";
 import { EcCommand } from "../../types/command";
 import { logger } from "../../utils/logger";
@@ -23,7 +23,8 @@ export const banCommand: EcCommand = {
     )
     .toJSON(),
   async execute(interaction: CommandInteraction, guildId: string | null) {
-    const banManager = Container.get(BanManager);
+    await interaction.deferReply();
+    const banManager = Container.get(GuildManager);
     try {
       const targetUser = banManager.getUser(interaction);
       if (targetUser.id === interaction.guild?.ownerId) {
@@ -47,6 +48,6 @@ export const banCommand: EcCommand = {
       winstonLogger.error(error);
       logger.error("ban 커맨드를 실행하던도중 에러가 발생하였습니다.");
     }
-    // await Container.get(BanManager).banUser(interaction);
+    // await Container.get(GuildManager).banUser(interaction);
   },
 };
