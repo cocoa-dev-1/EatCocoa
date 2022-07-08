@@ -311,7 +311,8 @@ export class GuildVoiceManager {
         }
       }
     });
-    return resultOptions;
+    const finalResult = resultOptions.filter((data) => data !== undefined);
+    return finalResult;
   }
 
   async loop(interaction: EcCommandInteraction) {
