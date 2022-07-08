@@ -110,9 +110,6 @@ export class Player {
   async pause() {
     if (this.player) {
       const pauseStatus = this.player.pause();
-      if (pauseStatus) {
-        this.playing = false;
-      }
       return pauseStatus;
     }
   }
@@ -120,9 +117,6 @@ export class Player {
   async resume() {
     if (this.player) {
       const unPauseStatus = this.player.unpause();
-      if (unPauseStatus) {
-        this.playing = true;
-      }
       return unPauseStatus;
     }
   }
