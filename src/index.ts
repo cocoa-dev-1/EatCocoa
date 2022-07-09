@@ -11,12 +11,14 @@ import { loadManager } from "./loader/managerLoader";
 moment.tz.setDefault("Asia/Seoul");
 import { generateDependencyReport } from "@discordjs/voice";
 import { BOT_TOKEN } from "../config.json";
+import { loadTypeorm } from "./loader/typeormLoader";
 
 export const client = new EatCocoa({
   intents: new Intents(32757),
 });
 
 client.once("ready", async () => {
+  await loadTypeorm();
   await loadCommands();
   await loadEvents(client);
   await loadManager(client);
