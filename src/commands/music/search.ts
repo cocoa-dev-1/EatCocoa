@@ -16,11 +16,11 @@ import {
 import { playCommand } from "./play";
 
 export const searchCommand: EcCommand = {
-  name: "search",
+  name: "검색",
   description: "유튜브에서 노래를 찾습니다.",
   category: CommandCategory.get("MUSIC").value,
   data: new SlashCommandBuilder()
-    .setName("search")
+    .setName("검색")
     .setDescription("유튜브에서 노래를 찾습니다.")
     .addStringOption((option) =>
       option

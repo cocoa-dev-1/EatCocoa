@@ -9,14 +9,17 @@ import {
 } from "../../types/command";
 
 export const playCommand: EcCommand = {
-  name: "play",
+  name: "재생",
   description: "노래 재생하기",
   category: CommandCategory.get("MUSIC").value,
   data: new SlashCommandBuilder()
-    .setName("play")
+    .setName("재생")
     .setDescription("노래를 재생합니다.")
     .addStringOption((option) =>
-      option.setName("url").setRequired(true).setDescription("노래의 URL")
+      option
+        .setName("노래")
+        .setRequired(true)
+        .setDescription("노래의 URL 또는 노래 이름")
     )
     .toJSON(),
   async execute(
@@ -25,7 +28,7 @@ export const playCommand: EcCommand = {
   ): Promise<void> {
     await interaction.deferReply();
     const guildVoiceManager = Container.get(GuildVoiceManager);
-    const url = interaction.options.getString("url");
+    const url = interaction.options.getString("노래");
     if (url) {
       const canPlay = await guildVoiceManager.check(interaction, guildId);
       if (canPlay) {

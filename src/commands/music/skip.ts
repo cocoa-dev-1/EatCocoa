@@ -8,11 +8,11 @@ import {
 } from "../../types/command";
 
 export const skipCommand: EcCommand = {
-  name: "skip",
+  name: "스킵",
   description: "재생중인 곡을 스킵합니다.",
   category: CommandCategory.get("MUSIC").value,
   data: new SlashCommandBuilder()
-    .setName("skip")
+    .setName("스킵")
     .setDescription("재생중인 곡을 스킵합니다.")
     .toJSON(),
   async execute(interaction: EcCommandInteraction, guildId: string) {

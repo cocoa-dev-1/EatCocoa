@@ -8,12 +8,12 @@ import {
 } from "../../types/command";
 
 export const stopCommand: EcCommand = {
-  name: "stop",
-  description: "노래를 완전히 정지합니다.",
+  name: "종료",
+  description: "노래를 완전히 종료합니다.",
   category: CommandCategory.get("MUSIC").value,
   data: new SlashCommandBuilder()
-    .setName("stop")
-    .setDescription("노래를 완전히 정지합니다.")
+    .setName("종료")
+    .setDescription("노래를 완전히 종료합니다.")
     .toJSON(),
   async execute(interaction: EcCommandInteraction, guildId: string) {
     await interaction.deferReply();

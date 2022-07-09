@@ -16,11 +16,11 @@ import {
 } from "../../types/command";
 
 export const queueCommand: EcCommand = {
-  name: "queue",
+  name: "노래목록",
   description: "서버에서 재생중인 노래 목록을 가져옵니다.",
   category: CommandCategory.get("MUSIC").value,
   data: new SlashCommandBuilder()
-    .setName("queue")
+    .setName("노래목록")
     .setDescription("서버에서 재생중인 노래 목록을 가져옵니다.")
     .toJSON(),
   async execute(interaction: EcCommandInteraction, guildId: string) {

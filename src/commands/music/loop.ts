@@ -8,11 +8,11 @@ import {
 } from "../../types/command";
 
 export const loopCommand: EcCommand = {
-  name: "loop",
+  name: "반복",
   description: "현재 플레이 리스트를 반복재생/해제 합니다.",
   category: CommandCategory.get("MUSIC").value,
   data: new SlashCommandBuilder()
-    .setName("loop")
+    .setName("반복")
     .setDescription("현재 플레이 리스트를 반복재생/해제 합니다.")
     .toJSON(),
   async execute(interaction: EcCommandInteraction, guildId: string) {
