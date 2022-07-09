@@ -1,0 +1,11 @@
+{
+  "BOT_TOKEN": "",
+  "CLIENT_ID": "",
+  "db": {
+    "host": "localhost",
+    "port": 3306,
+    "username": "",
+    "password": "",
+    "database": ""
+  }
+}

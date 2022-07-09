@@ -3,5 +3,6 @@ build
 logs
 
 .env
+config.json
 
 LavaLink

@@ -1,6 +1,6 @@
 import "reflect-metadata";
 import { Intents } from "discord.js";
-import "./utils/dotenv";
+// import "./utils/dotenv";
 import { logger } from "./utils/logger";
 import { loadCommands, commands } from "./loader/commandLoader";
 import { loadEvents } from "./loader/eventLoader";
@@ -10,6 +10,7 @@ import { EatCocoa } from "./structures/Client";
 import { loadManager } from "./loader/managerLoader";
 moment.tz.setDefault("Asia/Seoul");
 import { generateDependencyReport } from "@discordjs/voice";
+import { BOT_TOKEN } from "../config.json";
 
 export const client = new EatCocoa({
   intents: new Intents(32757),
@@ -24,4 +25,4 @@ client.once("ready", async () => {
   // logger.log(generateDependencyReport());
 });
 
-client.login(process.env.BOT_TOKEN);
+client.login(BOT_TOKEN);
