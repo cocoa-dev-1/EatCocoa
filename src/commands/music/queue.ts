@@ -95,6 +95,8 @@ export const queueCommand: EcCommand = {
           }
         }
       });
+    } else {
+      guildVoiceManager.Error(interaction, "재생중인 노래가 없습니다.");
     }
   },
 };
