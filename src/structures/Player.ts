@@ -25,6 +25,7 @@ import playdl from "play-dl";
 import { defaultImage } from "../utils/asset";
 import { winstonLogger } from "../utils/winston";
 import { client } from "../index";
+import { throws } from "assert";
 
 export class Player {
   public queue: PlayerItem[];
@@ -78,14 +79,16 @@ export class Player {
 
   setNextPosition() {
     if (this.endless) {
-      this.position = this.queue.length % (this.position + 1);
+      let p = this.position + 1;
+      if (this.queue.length <= p) p = 0;
+      this.position = p;
     } else {
       this.position = this.position + 1;
     }
   }
 
   async nextQueue() {
-    if (this.queue.length - 1 > this.position || this.endless) {
+    if ((this.queue.length - 1 > this.position) || this.endless) {
       this.setNextPosition();
       this.current = this.getCurrentQueue(this.position);
       const readableStream = await playdl.stream(this.current.url, {
