@@ -1,17 +1,22 @@
 import { MessageEmbed, User } from "discord.js";
-import { Service } from "typedi";
+import Container, { Service } from "typedi";
 import { Repository } from "typeorm";
 import { PlayList } from "../entities/PlayList";
-import { EatCocoaDataSource } from "../loader/typeormLoader";
+import { Song } from "../entities/Song";
+import { ECDataSource } from "../loader/typeormLoader";
 import { EcCommandInteraction } from "../types/command";
 import { DiscordColor } from "../types/discord";
+import { EcSendMessageOption } from "../types/message";
 import { defaultImage } from "../utils/asset";
+import { winstonLogger } from "../utils/winston";
+import { SongManager } from "./SongManager";
+import { YtManager } from "./YtManager";
 
 @Service()
 export class PlayListManager {
   private playlistRepository: Repository<PlayList>;
-  constructor() {
-    this.playlistRepository = EatCocoaDataSource.getRepository(PlayList);
+  constructor(private ytManager: YtManager, private songManager: SongManager) {
+    this.playlistRepository = ECDataSource.getRepository(PlayList);
   }
   async isExist(name: string) {
     const result = await this.playlistRepository.findOne({
@@ -31,23 +36,49 @@ export class PlayListManager {
     return result;
   }
 
-  async sendMessage(
-    interaction: EcCommandInteraction,
-    title: string,
-    msg?: string,
-    color?: DiscordColor
-  ) {
+  async get(name: string) {
+    const result = await this.playlistRepository.findOne({
+      where: {
+        name: name,
+      },
+    });
+    return result;
+  }
+
+  async add(name: string, url: string) {
+    try {
+      const isExist = await this.songManager.isExist(url);
+      if (!isExist) {
+        const song = await this.ytManager.getVideoInfo(url);
+        const result = await this.songManager.create(
+          song.videoDetails.title,
+          url
+        );
+      } else {
+        const playlist = await this.get(name);
+        const result = await this.songManager.get(url);
+        playlist.songs.push(result);
+        this.playlistRepository.save(playlist);
+        return true;
+      }
+    } catch (error) {
+      winstonLogger.error(error);
+      return false;
+    }
+  }
+
+  async sendMessage(option: EcSendMessageOption) {
     const embed = new MessageEmbed({
-      title: title,
-      description: msg || null,
-      color: color || null,
+      title: option.title,
+      description: option?.msg || null,
+      color: option?.color || null,
       timestamp: new Date(),
       footer: {
         text: "코코아 봇",
         iconURL: defaultImage,
       },
     });
-    await interaction.editReply({
+    await option.interaction.editReply({
       embeds: [embed],
     });
   }

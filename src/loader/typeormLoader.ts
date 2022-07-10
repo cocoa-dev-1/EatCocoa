@@ -4,7 +4,7 @@ import { PlayList } from "../entities/PlayList";
 import { logger } from "../utils/logger";
 import { winstonLogger } from "../utils/winston";
 
-export const EatCocoaDataSource = new DataSource({
+export const ECDataSource = new DataSource({
   type: "mysql",
   host: db.host,
   port: db.port,
@@ -15,7 +15,7 @@ export const EatCocoaDataSource = new DataSource({
 });
 
 export const loadTypeorm = async () => {
-  EatCocoaDataSource.initialize()
+  ECDataSource.initialize()
     .then(() => {
       logger.success("Data Source has been initialized!");
     })

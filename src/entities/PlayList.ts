@@ -1,5 +1,12 @@
 import { User } from "discord.js";
-import { Column, Entity, PrimaryGeneratedColumn, Unique } from "typeorm";
+import {
+  Column,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  Unique,
+} from "typeorm";
+import { Song } from "./Song";
 
 @Entity()
 export class PlayList {
@@ -11,4 +18,7 @@ export class PlayList {
 
   @Column()
   creator: string;
+
+  @OneToMany(() => Song, (song) => song.id)
+  songs: Song[];
 }

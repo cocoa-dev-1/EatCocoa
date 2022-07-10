@@ -11,7 +11,7 @@ import {
 export const createCommand: EcCommand = {
   name: "생성",
   description: "플레이 리스트를 생성합니다.",
-  category: CommandCategory.get("MUSIC").value,
+  category: CommandCategory.get("PLAYLIST").value,
   data: new SlashCommandBuilder()
     .setName("생성")
     .setDescription("플레이 리스트를 생성합니다.")
@@ -33,22 +33,22 @@ export const createCommand: EcCommand = {
         interaction.member.user.id
       );
       if (result) {
-        await playListManager.sendMessage(
-          interaction,
-          "플레이 리스트가 생성되었습니다.",
-          result.name
-        );
+        await playListManager.sendMessage({
+          interaction: interaction,
+          title: "플레이 리스트가 생성되었습니다.",
+          msg: `이름: ${result.name}`,
+        });
       } else {
-        await playListManager.sendMessage(
-          interaction,
-          "플레이 리스트를 생성하던중 오류가 발생했습니다."
-        );
+        await playListManager.sendMessage({
+          interaction: interaction,
+          title: "플레이 리스트를 생성하던중 오류가 발생했습니다.",
+        });
       }
     } else {
-      await playListManager.sendMessage(
-        interaction,
-        "이미 존재하는 플레이리스트 이름입니다."
-      );
+      await playListManager.sendMessage({
+        interaction: interaction,
+        title: "이미 존재하는 플레이리스트 이름입니다.",
+      });
     }
   },
 };

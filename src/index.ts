@@ -18,7 +18,7 @@ export const client = new EatCocoa({
 });
 
 client.once("ready", async () => {
-  // await loadTypeorm();
+  await loadTypeorm();
   await loadCommands();
   await loadEvents(client);
   await loadManager(client);

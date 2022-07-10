@@ -32,6 +32,11 @@ export const CommandCategoryList: EcCommandCategory[] = [
     value: "음악 명령어",
     description: "음악 명령어를 확인합니다.",
   },
+  {
+    name: "PLAYLIST",
+    value: "플레이 리스트 명령어",
+    description: "플레이 리스트 명령어를 확인합니다.",
+  },
 ];
 
 export const CommandCategory = new Map<string, EcCommandCategory>();

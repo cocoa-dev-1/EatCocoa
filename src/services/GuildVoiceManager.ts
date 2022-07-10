@@ -21,10 +21,7 @@ import { title } from "process";
 
 @Service()
 export class GuildVoiceManager {
-  ytManager: YtManager;
-  constructor() {
-    this.ytManager = new YtManager();
-  }
+  constructor(public ytManager: YtManager) {}
 
   async hasPlayer(interaction: EcCommandInteraction) {
     const { music } = interaction.client;
@@ -299,7 +296,9 @@ export class GuildVoiceManager {
     //await this.createActionList(result);
   }
 
-  async createResultOptions(result: Item[]): Promise<MessageSelectOptionData[]> {
+  async createResultOptions(
+    result: Item[]
+  ): Promise<MessageSelectOptionData[]> {
     const resultOptions = result.map((element) => {
       if (element.type === "video") {
         if (element.title !== undefined || element.title !== null) {
