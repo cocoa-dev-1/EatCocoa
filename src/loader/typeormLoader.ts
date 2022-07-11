@@ -5,6 +5,7 @@ import { Song } from "../entities/Song";
 import { logger } from "../utils/logger";
 import { winstonLogger } from "../utils/winston";
 import path from "path";
+import { SongDetail } from "../entities/SongDetail";
 
 export const ECDataSource = new DataSource({
   type: "mariadb",
@@ -13,7 +14,7 @@ export const ECDataSource = new DataSource({
   username: db.username,
   password: db.password,
   database: db.database,
-  entities: [PlayList, Song],
+  entities: [PlayList, Song, SongDetail],
   migrations: [path.resolve(__dirname, "src/migration") + "/*.ts"],
   migrationsTableName: "migration",
   synchronize: DEV ? true : false,

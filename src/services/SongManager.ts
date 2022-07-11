@@ -3,6 +3,7 @@ import { Service } from "typedi";
 import { Repository } from "typeorm";
 import { Song } from "../entities/Song";
 import { ECDataSource } from "../loader/typeormLoader";
+import { SongDetail } from "../entities/SongDetail";
 
 @Service()
 export class SongManager {
@@ -11,31 +12,45 @@ export class SongManager {
     this.songRepository = ECDataSource.getRepository(Song);
   }
 
-  async isExist(url: string) {
+  async isExist(url: string): Promise<boolean> {
     const result = await this.songRepository.findOne({
       where: {
-        url: url,
+        songDetail: {
+          url: url,
+        },
       },
     });
     if (result) return true;
     else return false;
   }
 
-  async create(name: string, url: string, playlist: PlayList) {
+  async create(songDetail: SongDetail, playlist: PlayList): Promise<Song> {
+    const index = await this.getPlayListIndex(playlist);
     const song = this.songRepository.create();
-    song.name = name;
-    song.url = url;
-    song.playListName = playlist;
+    song.playList = playlist;
+    song.songDetail = songDetail;
+    song.playListIndex = index;
     const result = await this.songRepository.save(song);
     return result;
   }
 
-  async get(url: string) {
+  async get(url: string): Promise<Song> {
     const result = await this.songRepository.findOne({
       where: {
-        url: url,
+        songDetail: {
+          url: url,
+        },
       },
     });
     return result;
+  }
+
+  async getPlayListIndex(playlist: PlayList): Promise<number> {
+    const result = await this.songRepository.find({
+      where: {
+        playList: playlist,
+      },
+    });
+    return result?.length || 0;
   }
 }

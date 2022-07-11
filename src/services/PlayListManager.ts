@@ -12,11 +12,16 @@ import { defaultImage } from "../utils/asset";
 import { winstonLogger } from "../utils/winston";
 import { SongManager } from "./SongManager";
 import { YtManager } from "./YtManager";
+import { SongDetailManager } from "./SongDetailManager";
 
 @Service()
 export class PlayListManager {
   private playlistRepository: Repository<PlayList>;
-  constructor(private ytManager: YtManager, private songManager: SongManager) {
+  constructor(
+    private ytManager: YtManager,
+    private songManager: SongManager,
+    private songDetailManager: SongDetailManager
+  ) {
     this.playlistRepository = ECDataSource.getRepository(PlayList);
   }
   async isExist(name: string) {
@@ -48,19 +53,26 @@ export class PlayListManager {
 
   async add(name: string, url: string) {
     try {
-      const isExist = await this.songManager.isExist(url);
+      const isExist = await this.songDetailManager.isExist(url);
       const playlist = await this.get(name);
       if (!isExist) {
         const song = await this.ytManager.getVideoInfo(url);
-        const result = await this.songManager.create(
+        const songDeatilResult = await this.songDetailManager.create(
           song.videoDetails.title,
-          url,
+          url
+        );
+        const result = await this.songManager.create(
+          songDeatilResult,
           playlist
         );
         if (result) return true;
         else return false;
       } else {
-        const result = await this.songManager.get(url);
+        const songDeatilResult = await this.songDetailManager.get(url);
+        const result = await this.songManager.create(
+          songDeatilResult,
+          playlist
+        );
         if (result) return true;
         else return false;
       }

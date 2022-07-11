@@ -1,5 +1,15 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 import { PlayList } from "./PlayList";
+import { SongDetail } from "./SongDetail";
 
 @Entity()
 export class Song {
@@ -7,11 +17,19 @@ export class Song {
   id: number;
 
   @ManyToOne(() => PlayList, (playlist) => playlist.id, { onDelete: "CASCADE" })
-  playListName: PlayList;
+  playList: PlayList;
 
   @Column()
-  name: string;
+  playListIndex: number;
 
-  @Column({ unique: true })
-  url: string;
+  // @Column()
+  // name: string;
+
+  // @Column()
+  // url: string;
+
+  @ManyToOne(() => SongDetail, (songDetail) => songDetail.id, {
+    onDelete: "CASCADE",
+  })
+  songDetail: SongDetail;
 }
