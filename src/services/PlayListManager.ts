@@ -1,4 +1,5 @@
 import { MessageEmbed, User } from "discord.js";
+import { logger } from "../utils/logger";
 import Container, { Service } from "typedi";
 import { Repository } from "typeorm";
 import { PlayList } from "../entities/PlayList";
@@ -48,21 +49,24 @@ export class PlayListManager {
   async add(name: string, url: string) {
     try {
       const isExist = await this.songManager.isExist(url);
+      const playlist = await this.get(name);
       if (!isExist) {
         const song = await this.ytManager.getVideoInfo(url);
         const result = await this.songManager.create(
           song.videoDetails.title,
-          url
+          url,
+          playlist
         );
+        if (result) return true;
+        else return false;
       } else {
-        const playlist = await this.get(name);
         const result = await this.songManager.get(url);
-        playlist.songs.push(result);
-        this.playlistRepository.save(playlist);
-        return true;
+        if (result) return true;
+        else return false;
       }
     } catch (error) {
       winstonLogger.error(error);
+      logger.error("Error while adding song to playlist");
       return false;
     }
   }

@@ -1,17 +1,23 @@
 import { DataSource, Db } from "typeorm";
-import { db } from "../../config.json";
+import { db, DEV } from "../../config.json";
 import { PlayList } from "../entities/PlayList";
+import { Song } from "../entities/Song";
 import { logger } from "../utils/logger";
 import { winstonLogger } from "../utils/winston";
+import path from "path";
 
 export const ECDataSource = new DataSource({
-  type: "mysql",
+  type: "mariadb",
   host: db.host,
   port: db.port,
   username: db.username,
   password: db.password,
   database: db.database,
-  entities: [PlayList],
+  entities: [PlayList, Song],
+  migrations: [path.resolve(__dirname, "src/migration") + "/*.ts"],
+  migrationsTableName: "migration",
+  synchronize: DEV ? true : false,
+  logging: ["warn", "error"],
 });
 
 export const loadTypeorm = async () => {

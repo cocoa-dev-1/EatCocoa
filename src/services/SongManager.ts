@@ -1,3 +1,4 @@
+import { PlayList } from "../entities/PlayList";
 import { Service } from "typedi";
 import { Repository } from "typeorm";
 import { Song } from "../entities/Song";
@@ -20,11 +21,12 @@ export class SongManager {
     else return false;
   }
 
-  async create(name: string, url: string) {
+  async create(name: string, url: string, playlist: PlayList) {
     const song = this.songRepository.create();
     song.name = name;
     song.url = url;
-    const { ...result } = await this.songRepository.save(song);
+    song.playListName = playlist;
+    const result = await this.songRepository.save(song);
     return result;
   }
 

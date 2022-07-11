@@ -7,7 +7,10 @@
     "build": "tsc",
     "dev": "node --loader ts-node/esm/transpile-only src/index.ts",
     "start": "nodemon --exec node --loader ts-node/esm/transpile-only src/index.ts",
-    "serve": "node build/src/index.js"
+    "serve": "node build/index.js",
+    "typeorm": "typeorm-ts-node-commonjs",
+    "ts-node": "ts-node -r tsconfig-paths/register ./src/index.ts",
+    "start:pm2": "pm2 start ts-node -- --type-check -r tsconfig-paths/register ./src/index.ts"
   },
   "author": "코코아#2626",
   "license": "ISC",
@@ -17,6 +20,7 @@
     "@types/node": "^18.0.0",
     "nodemon": "^2.0.18",
     "ts-node": "^10.8.1",
+    "tsconfig-paths": "^4.0.0",
     "typescript": "^4.7.4"
   },
   "dependencies": {
@@ -35,7 +39,7 @@
     "play-dl": "^1.9.5",
     "sodium": "^3.0.2",
     "typedi": "^0.10.0",
-    "typeorm": "^0.3.7",
+    "typeorm": "^0.3.6",
     "winston": "^3.8.0",
     "winston-daily-rotate-file": "^4.7.1",
     "ytdl-core": "^4.11.0",

@@ -11,7 +11,7 @@ import { loadManager } from "./loader/managerLoader";
 moment.tz.setDefault("Asia/Seoul");
 import { generateDependencyReport } from "@discordjs/voice";
 import { BOT_TOKEN } from "../config.json";
-import { loadTypeorm } from "./loader/typeormLoader";
+import { loadTypeorm, ECDataSource } from "./loader/typeormLoader";
 
 export const client = new EatCocoa({
   intents: new Intents(32757),
@@ -25,6 +25,9 @@ client.once("ready", async () => {
   logger.success("봇이 성공적으로 시작되었습니다.");
   winstonLogger.info("Bot started successfully");
   // logger.log(generateDependencyReport());
+  // ECDataSource.runMigrations({
+  //   transaction: "all",
+  // });
 });
 
 client.login(BOT_TOKEN);
