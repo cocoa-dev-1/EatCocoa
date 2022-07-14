@@ -12,6 +12,7 @@ moment.tz.setDefault("Asia/Seoul");
 import { generateDependencyReport } from "@discordjs/voice";
 import { BOT_TOKEN } from "../config.json";
 import { loadTypeorm, ECDataSource } from "./loader/typeormLoader";
+import { cli } from "winston/lib/winston/config";
 
 export const client = new EatCocoa({
   intents: new Intents(32757),
@@ -28,6 +29,14 @@ client.once("ready", async () => {
   // ECDataSource.runMigrations({
   //   transaction: "all",
   // });
+  setInterval(() => {
+    const servers = client.guilds.cache
+      .map((guild) => guild.id)
+      .length.toLocaleString();
+    client.user.setActivity(`/도움말 | ${servers} 개의 서버`, {
+      type: "PLAYING",
+    });
+  }, 10000);
 });
 
 client.login(BOT_TOKEN);
