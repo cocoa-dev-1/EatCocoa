@@ -13,6 +13,7 @@ import {
   createAudioPlayer,
   createAudioResource,
   demuxProbe,
+  DiscordGatewayAdapterCreator,
   entersState,
   joinVoiceChannel,
   NoSubscriberBehavior,
@@ -158,7 +159,8 @@ export class Player {
     this.connection = joinVoiceChannel({
       channelId: this.voiceChannel.id,
       guildId: this.voiceChannel.guild.id,
-      adapterCreator: channel.guild.voiceAdapterCreator,
+      adapterCreator: channel.guild
+        .voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator,
     });
     this.bindConnectionEvent();
   }
