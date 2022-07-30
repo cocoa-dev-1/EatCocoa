@@ -1,5 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import {
+  ComponentType,
   Interaction,
   InteractionCollector,
   Message,
@@ -36,9 +37,11 @@ export const searchCommand: EcCommand = {
     if (canSearch) {
       await guildVoiceManager.search(interaction);
       const collector =
-        interaction.channel.createMessageComponentCollector<"ACTION_ROW">({
-          time: 30000,
-        });
+        interaction.channel.createMessageComponentCollector<ComponentType.SelectMenu>(
+          {
+            time: 30000,
+          }
+        );
       collector.on("collect", async (i: MessageComponentInteraction) => {
         if (i.customId === "search" && i.isSelectMenu()) {
           await i.update({

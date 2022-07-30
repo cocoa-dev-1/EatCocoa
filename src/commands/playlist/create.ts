@@ -43,7 +43,7 @@ export const createCommand: EcCommand = {
         await playListManager.sendMessage({
           interaction: interaction,
           title: "플레이 리스트를 생성하던중 오류가 발생했습니다.",
-          color: DiscordColor.RED,
+          color: DiscordColor.Red,
         });
       }
     } else {
@@ -51,7 +51,7 @@ export const createCommand: EcCommand = {
         interaction: interaction,
         title: "이미 존재하는 플레이리스트 이름입니다.",
         msg: `이름: ${listName}`,
-        color: DiscordColor.RED,
+        color: DiscordColor.Red,
       });
     }
   },

@@ -1,5 +1,5 @@
 import "reflect-metadata";
-import { Intents } from "discord.js";
+import { GatewayIntentBits, Partials } from "discord.js";
 // import "./utils/dotenv";
 import { logger } from "./utils/logger";
 import { loadCommands, commands } from "./loader/commandLoader";
@@ -13,9 +13,11 @@ import { generateDependencyReport } from "@discordjs/voice";
 import { BOT_TOKEN } from "../config.json";
 import { loadTypeorm, ECDataSource } from "./loader/typeormLoader";
 import { cli } from "winston/lib/winston/config";
+import { ActivityType } from "discord-api-types/v10";
 
 export const client = new EatCocoa({
-  intents: new Intents(32757),
+  intents: [GatewayIntentBits.Guilds],
+  partials: [Partials.Channel],
 });
 
 client.once("ready", async () => {
@@ -34,7 +36,7 @@ client.once("ready", async () => {
       .map((guild) => guild.id)
       .length.toLocaleString();
     client.user.setActivity(`/도움말 | ${servers} 개의 서버`, {
-      type: "PLAYING",
+      type: ActivityType.Playing,
     });
   }, 10000);
 });

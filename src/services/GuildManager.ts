@@ -1,8 +1,9 @@
 import {
   CommandInteraction,
   GuildMember,
-  MessageEmbed,
+  EmbedBuilder,
   User,
+  PermissionsBitField,
 } from "discord.js";
 import { Service } from "typedi";
 import { DiscordColor, DiscordPermission } from "../types/discord";
@@ -56,7 +57,7 @@ export class GuildManager {
     if (
       targetUserCash.roles.highest.comparePositionTo(userCash.roles.highest) >=
         0 &&
-      !targetUserCash.permissions.has(DiscordPermission.ADMIN)
+      !targetUserCash.permissions.has(PermissionsBitField.Flags.Administrator)
     ) {
       return true;
     }
@@ -82,10 +83,10 @@ export class GuildManager {
     interaction: CommandInteraction,
     targetUser: User
   ): Promise<void> {
-    const embed = new MessageEmbed({
+    const embed = new EmbedBuilder({
       title: "차단 되었습니다.",
       description: `<@${targetUser.id}> 님이 차단되었습니다.`,
-      color: DiscordColor.RED,
+      color: DiscordColor.Red,
       timestamp: new Date(),
       footer: {
         text: "코코아 봇",
@@ -98,10 +99,10 @@ export class GuildManager {
   }
 
   async unbanSuccess(interaction: CommandInteraction, targetUser: User) {
-    const embed = new MessageEmbed({
+    const embed = new EmbedBuilder({
       title: "차단해제 되었습니다.",
       description: `<@${targetUser.id}> 님이 차단해제 되었습니다.`,
-      color: DiscordColor.GREEN,
+      color: DiscordColor.Green,
       timestamp: new Date(),
       footer: {
         text: "코코아 봇",
@@ -114,10 +115,10 @@ export class GuildManager {
   }
 
   async Error(interaction: CommandInteraction, msg: string): Promise<void> {
-    const embed = new MessageEmbed({
+    const embed = new EmbedBuilder({
       title: "에러",
       description: msg,
-      color: DiscordColor.RED,
+      color: DiscordColor.Red,
       timestamp: new Date(),
       footer: {
         text: "코코아 봇",

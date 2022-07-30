@@ -1,4 +1,4 @@
-import { MessageEmbed, User } from "discord.js";
+import { Colors, EmbedBuilder, User } from "discord.js";
 import { logger } from "../utils/logger";
 import Container, { Service } from "typedi";
 import { Repository } from "typeorm";
@@ -13,6 +13,7 @@ import { winstonLogger } from "../utils/winston";
 import { SongManager } from "./SongManager";
 import { YtManager } from "./YtManager";
 import { SongDetailManager } from "./SongDetailManager";
+import { EmbedType } from "discord-api-types/v10";
 
 @Service()
 export class PlayListManager {
@@ -84,7 +85,7 @@ export class PlayListManager {
   }
 
   async sendMessage(option: EcSendMessageOption) {
-    const embed = new MessageEmbed({
+    const embed = new EmbedBuilder({
       title: option.title,
       description: option?.msg || null,
       color: option?.color || null,

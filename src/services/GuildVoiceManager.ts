@@ -1,11 +1,14 @@
 import {
   Guild,
+  GuildBasedChannel,
+  GuildChannel,
   Message,
-  MessageActionRow,
-  MessageEmbed,
-  MessageSelectMenu,
-  MessageSelectOptionData,
+  ActionRowBuilder,
+  EmbedBuilder,
+  SelectMenuBuilder,
   VoiceBasedChannel,
+  SelectMenuComponentOptionData,
+  MessageActionRowComponentBuilder,
 } from "discord.js";
 import { getVoiceConnection } from "@discordjs/voice";
 import { Service } from "typedi";
@@ -53,7 +56,10 @@ export class GuildVoiceManager {
     guildId: string
   ): Promise<boolean> {
     const isInVoice = await this.inVoiceCheck(interaction);
-    const botVoiceChannel = interaction.guild.me.voice.channel;
+    const connection = getVoiceConnection(interaction.guild.id);
+    const botVoiceChannel = await interaction.guild.channels.cache.get(
+      connection.joinConfig.channelId
+    );
     if (isInVoice) {
       if (botVoiceChannel) {
         const isInSameVoice = await this.inSameVoiceCheck(
@@ -83,10 +89,10 @@ export class GuildVoiceManager {
 
   async inSameVoiceCheck(
     interaction: EcCommandInteraction,
-    botVoiceChannel: VoiceBasedChannel
+    botVoiceChannel: GuildBasedChannel
   ): Promise<boolean> {
     const channel = await this.getUserVoiceChannel(interaction);
-    if (botVoiceChannel.equals(channel)) {
+    if (botVoiceChannel.id === channel.id) {
       return true;
     } else {
       return false;
@@ -163,7 +169,7 @@ export class GuildVoiceManager {
     let title = list ? "플레이 리스트를 추가했습니다." : "노래를 추가했습니다.";
     let description = list?.title || music.title;
     let thumbnail = list?.bestThumbnail || music.thumbnail;
-    const embed = new MessageEmbed({
+    const embed = new EmbedBuilder({
       title: title,
       description: description,
       image: thumbnail,
@@ -188,7 +194,7 @@ export class GuildVoiceManager {
   }
 
   async stopSuccess(interaction: EcCommandInteraction, msg: string) {
-    const embed = new MessageEmbed({
+    const embed = new EmbedBuilder({
       title: msg,
       timestamp: new Date(),
       footer: {
@@ -230,7 +236,7 @@ export class GuildVoiceManager {
     } else if (type === "resume") {
       title = "노래를 다시 재생합니다.";
     }
-    const embed = new MessageEmbed({
+    const embed = new EmbedBuilder({
       title: title,
       timestamp: new Date(),
       footer: {
@@ -257,7 +263,7 @@ export class GuildVoiceManager {
   }
 
   async skipSuccess(interaction: EcCommandInteraction, msg: string) {
-    const embed = new MessageEmbed({
+    const embed = new EmbedBuilder({
       title: "노래를 스킵했습니다.",
       description: msg,
       timestamp: new Date(),
@@ -274,13 +280,14 @@ export class GuildVoiceManager {
   async search(interaction: EcCommandInteraction) {
     const song = interaction.options.getString("song");
     const result = await this.ytManager.search(song);
-    const resultActionList = new MessageActionRow().addComponents(
-      new MessageSelectMenu()
-        .setCustomId("search")
-        .setPlaceholder("노래를 선택하세요.")
-        .addOptions(await this.createResultOptions(result))
-    );
-    const embed = new MessageEmbed({
+    const resultActionList =
+      new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+        new SelectMenuBuilder()
+          .setCustomId("search")
+          .setPlaceholder("노래를 선택하세요.")
+          .addOptions(await this.createResultOptions(result))
+      );
+    const embed = new EmbedBuilder({
       title: "노래를 선택하세요",
       description: "30초 안에 선택해야합니다",
       timestamp: new Date(),
@@ -298,7 +305,7 @@ export class GuildVoiceManager {
 
   async createResultOptions(
     result: Item[]
-  ): Promise<MessageSelectOptionData[]> {
+  ): Promise<SelectMenuComponentOptionData[]> {
     const resultOptions = result.map((element) => {
       if (element.type === "video") {
         if (element.title !== undefined || element.title !== null) {
@@ -333,7 +340,7 @@ export class GuildVoiceManager {
   }
 
   async loopSuccess(interaction: EcCommandInteraction, msg: string) {
-    const embed = new MessageEmbed({
+    const embed = new EmbedBuilder({
       title: msg,
       timestamp: new Date(),
       footer: {
@@ -347,10 +354,10 @@ export class GuildVoiceManager {
   }
 
   async Error(interaction: EcCommandInteraction, msg: string) {
-    const embed = new MessageEmbed({
+    const embed = new EmbedBuilder({
       title: "에러",
       description: msg,
-      color: DiscordColor.RED,
+      color: DiscordColor.Red,
       timestamp: new Date(),
       footer: {
         text: "코코아 봇",

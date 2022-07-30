@@ -1,7 +1,7 @@
 import { PlayerItem, PlayerOption } from "../types/player";
 import {
   GuildTextBasedChannel,
-  MessageEmbed,
+  EmbedBuilder,
   VoiceBasedChannel,
 } from "discord.js";
 import { Item, Result } from "ytpl";
@@ -88,7 +88,7 @@ export class Player {
   }
 
   async nextQueue() {
-    if ((this.queue.length - 1 > this.position) || this.endless) {
+    if (this.queue.length - 1 > this.position || this.endless) {
       this.setNextPosition();
       this.current = this.getCurrentQueue(this.position);
       const readableStream = await playdl.stream(this.current.url, {
@@ -158,7 +158,7 @@ export class Player {
     this.connection = joinVoiceChannel({
       channelId: this.voiceChannel.id,
       guildId: this.voiceChannel.guild.id,
-      adapterCreator: this.voiceChannel.guild.voiceAdapterCreator,
+      adapterCreator: channel.guild.voiceAdapterCreator,
     });
     this.bindConnectionEvent();
   }
@@ -257,7 +257,7 @@ export class Player {
   }
 
   async sendMessage(channel: GuildTextBasedChannel, message: string) {
-    const embed = new MessageEmbed({
+    const embed = new EmbedBuilder({
       title: message,
       timestamp: new Date(),
       footer: {

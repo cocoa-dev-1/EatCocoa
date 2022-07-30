@@ -1,10 +1,13 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import {
+  ButtonBuilder,
+  ButtonStyle,
+  ComponentType,
   InteractionCollector,
-  MessageActionRow,
-  MessageButton,
+  ActionRowBuilder,
   MessageComponentInteraction,
-  MessageEmbed,
+  EmbedBuilder,
+  MessageActionRowComponentBuilder,
 } from "discord.js";
 import Container from "typedi";
 import { GuildVoiceManager } from "../../services/GuildVoiceManager";
@@ -30,28 +33,32 @@ export const queueCommand: EcCommand = {
     const musicPlayer = await guildVoiceManager.getPlayer(interaction, guildId);
     if (musicPlayer) {
       let page = 0;
-      const embedList: MessageEmbed[] = await queueManager.createEmbedList(
+      const embedList: EmbedBuilder[] = await queueManager.createEmbedList(
         interaction,
         musicPlayer
       );
-      const last = new MessageButton()
+      const last = new ButtonBuilder()
         .setCustomId("이전")
         .setDisabled(true)
         .setLabel("이전")
-        .setStyle("SUCCESS");
-      const next = new MessageButton()
+        .setStyle(ButtonStyle.Success);
+      const next = new ButtonBuilder()
         .setCustomId("다음")
         .setLabel("다음")
-        .setStyle("SUCCESS");
+        .setStyle(ButtonStyle.Success);
       if (page + 1 === embedList.length) next.setDisabled(true);
-      const row = new MessageActionRow().addComponents(last, next);
+      const row =
+        new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+          last,
+          next
+        );
       await interaction.editReply({
         content: `**페이지: ${page + 1}/${embedList.length}**`,
         embeds: [embedList[0]],
         components: [row],
       });
       const collector =
-        interaction.channel.createMessageComponentCollector<"BUTTON">();
+        interaction.channel.createMessageComponentCollector<ComponentType.Button>();
       collector.on("collect", (i: MessageComponentInteraction) => {
         if (i.isButton()) {
           if (i.customId === "다음") {
@@ -67,7 +74,11 @@ export const queueCommand: EcCommand = {
             } else {
               last.setDisabled(true);
             }
-            const row = new MessageActionRow().addComponents(last, next);
+            const row =
+              new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+                last,
+                next
+              );
             i.update({
               content: `**페이지: ${nextPage + 1}/${embedList.length}**`,
               embeds: [currentPage],
@@ -86,7 +97,11 @@ export const queueCommand: EcCommand = {
             } else {
               last.setDisabled(true);
             }
-            const row = new MessageActionRow().addComponents(last, next);
+            const row =
+              new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+                last,
+                next
+              );
             i.update({
               content: `**페이지: ${lastPage + 1}/${embedList.length}**`,
               embeds: [currentPage],
