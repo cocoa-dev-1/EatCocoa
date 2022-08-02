@@ -8,15 +8,12 @@ import {
   MessageComponentInteraction,
   EmbedBuilder,
   MessageActionRowComponentBuilder,
+  ChatInputCommandInteraction,
 } from "discord.js";
 import Container from "typedi";
 import { GuildVoiceManager } from "../../services/GuildVoiceManager";
 import { QueueManager } from "../../services/QueueManager";
-import {
-  CommandCategory,
-  EcCommand,
-  EcCommandInteraction,
-} from "../../types/command";
+import { CommandCategory, EcCommand } from "../../types/command";
 
 export const queueCommand: EcCommand = {
   name: "노래목록",
@@ -26,7 +23,7 @@ export const queueCommand: EcCommand = {
     .setName("노래목록")
     .setDescription("서버에서 재생중인 노래 목록을 가져옵니다.")
     .toJSON(),
-  async execute(interaction: EcCommandInteraction, guildId: string) {
+  async execute(interaction: ChatInputCommandInteraction, guildId: string) {
     await interaction.deferReply();
     const guildVoiceManager = Container.get(GuildVoiceManager);
     const queueManager = Container.get(QueueManager);

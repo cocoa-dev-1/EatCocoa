@@ -1,11 +1,8 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
+import { ChatInputCommandInteraction } from "discord.js";
 import Container from "typedi";
 import { GuildVoiceManager } from "../../services/GuildVoiceManager";
-import {
-  CommandCategory,
-  EcCommand,
-  EcCommandInteraction,
-} from "../../types/command";
+import { CommandCategory, EcCommand } from "../../types/command";
 
 export const pauseCommand: EcCommand = {
   name: "일시정지",
@@ -15,7 +12,7 @@ export const pauseCommand: EcCommand = {
     .setName("일시정지")
     .setDescription("노래를 일시정지/재생 합니다.")
     .toJSON(),
-  async execute(interaction: EcCommandInteraction, guildId) {
+  async execute(interaction: ChatInputCommandInteraction, guildId) {
     await interaction.deferReply();
     const guildVoiceManager = Container.get(GuildVoiceManager);
     const canPause = await guildVoiceManager.check(interaction, guildId);

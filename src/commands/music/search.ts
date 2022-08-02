@@ -1,5 +1,6 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import {
+  ChatInputCommandInteraction,
   ComponentType,
   Interaction,
   InteractionCollector,
@@ -30,7 +31,7 @@ export const searchCommand: EcCommand = {
         .setRequired(true)
     )
     .toJSON(),
-  async execute(interaction: EcCommandInteraction, guildId: string) {
+  async execute(interaction: ChatInputCommandInteraction, guildId: string) {
     await interaction.deferReply();
     const guildVoiceManager = Container.get(GuildVoiceManager);
     const canSearch = await guildVoiceManager.check(interaction, guildId);

@@ -4,6 +4,7 @@ import {
   EmbedBuilder,
   User,
   PermissionsBitField,
+  ChatInputCommandInteraction,
 } from "discord.js";
 import { Service } from "typedi";
 import { DiscordColor, DiscordPermission } from "../types/discord";
@@ -15,12 +16,12 @@ import { winstonLogger } from "../utils/winston";
 export class GuildManager {
   constructor() {}
 
-  async ban(interaction: CommandInteraction, targetUser: User) {
+  async ban(interaction: ChatInputCommandInteraction, targetUser: User) {
     await interaction.guild.members.ban(targetUser);
     await this.banSuccess(interaction, targetUser);
   }
 
-  async unban(interaction: CommandInteraction, targetUserId: string) {
+  async unban(interaction: ChatInputCommandInteraction, targetUserId: string) {
     try {
       const targetUser = await interaction.guild.members.unban(targetUserId);
       await this.unbanSuccess(interaction, targetUser);
@@ -32,16 +33,16 @@ export class GuildManager {
     }
   }
 
-  getUser(interaction: CommandInteraction): User | undefined {
+  getUser(interaction: ChatInputCommandInteraction): User | undefined {
     return interaction.options.getUser("유저");
   }
 
-  getBanUser(interaction: CommandInteraction): string | undefined {
+  getBanUser(interaction: ChatInputCommandInteraction): string | undefined {
     return interaction.options.getString("유저");
   }
 
   async isBanned(
-    interaction: CommandInteraction,
+    interaction: ChatInputCommandInteraction,
     targetUserId: string
   ): Promise<User | undefined> {
     const targetUserCash = await interaction.guild.bans.fetch();
@@ -51,7 +52,7 @@ export class GuildManager {
     return isBanned?.user;
   }
 
-  canBan(interaction: CommandInteraction, targetUser: User): boolean {
+  canBan(interaction: ChatInputCommandInteraction, targetUser: User): boolean {
     const targetUserCash = interaction.guild.members.cache.get(targetUser.id);
     const userCash = interaction.guild.members.cache.get(interaction.user.id);
     if (
@@ -65,7 +66,7 @@ export class GuildManager {
   }
 
   async canUnban(
-    interaction: CommandInteraction,
+    interaction: ChatInputCommandInteraction,
     targetUserId: string
   ): Promise<boolean> {
     try {
@@ -80,7 +81,7 @@ export class GuildManager {
   }
 
   async banSuccess(
-    interaction: CommandInteraction,
+    interaction: ChatInputCommandInteraction,
     targetUser: User
   ): Promise<void> {
     const embed = new EmbedBuilder({
@@ -98,7 +99,10 @@ export class GuildManager {
     });
   }
 
-  async unbanSuccess(interaction: CommandInteraction, targetUser: User) {
+  async unbanSuccess(
+    interaction: ChatInputCommandInteraction,
+    targetUser: User
+  ) {
     const embed = new EmbedBuilder({
       title: "차단해제 되었습니다.",
       description: `<@${targetUser.id}> 님이 차단해제 되었습니다.`,
@@ -114,7 +118,10 @@ export class GuildManager {
     });
   }
 
-  async Error(interaction: CommandInteraction, msg: string): Promise<void> {
+  async Error(
+    interaction: ChatInputCommandInteraction,
+    msg: string
+  ): Promise<void> {
     const embed = new EmbedBuilder({
       title: "에러",
       description: msg,

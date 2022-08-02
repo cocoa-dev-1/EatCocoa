@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction } from "discord.js";
 import { CommandCategory, EcCommand } from "../../types/command";
 
 export const kickCommand: EcCommand = {
@@ -19,7 +19,7 @@ export const kickCommand: EcCommand = {
       option.setName("사유").setDescription("사유를 입력하세요.")
     )
     .toJSON(),
-  async execute(interaction: CommandInteraction, guildId: string) {
+  async execute(interaction: ChatInputCommandInteraction, guildId: string) {
     const member = interaction.options.getMember("유저");
     const reason = interaction.options.getString("사유") || "사유 없음";
   },

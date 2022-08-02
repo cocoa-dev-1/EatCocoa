@@ -1,14 +1,13 @@
-import { EmbedBuilder } from "discord.js";
+import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
 import { Service } from "typedi";
 import { Player } from "../structures/Player";
-import { EcCommandInteraction } from "../types/command";
 
 @Service()
 export class QueueManager {
   constructor() {}
 
   async createEmbedList(
-    interaction: EcCommandInteraction,
+    interaction: ChatInputCommandInteraction,
     musicPlayer: Player
   ) {
     const queue = musicPlayer.getRemainingQueue();

@@ -1,12 +1,8 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction, CommandInteraction } from "discord.js";
 import { Container } from "typedi";
 import { GuildVoiceManager } from "../../services/GuildVoiceManager";
-import {
-  CommandCategory,
-  EcCommand,
-  EcCommandInteraction,
-} from "../../types/command";
+import { CommandCategory, EcCommand } from "../../types/command";
 
 export const playCommand: EcCommand = {
   name: "재생",
@@ -23,7 +19,7 @@ export const playCommand: EcCommand = {
     )
     .toJSON(),
   async execute(
-    interaction: EcCommandInteraction,
+    interaction: ChatInputCommandInteraction,
     guildId: string
   ): Promise<void> {
     await interaction.deferReply();

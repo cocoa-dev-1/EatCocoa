@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction } from "discord.js";
 import { Container } from "typedi";
 import { GuildManager } from "../../services/GuildManager";
 import { CommandCategory, CommandPermission } from "../../types/command";
@@ -22,7 +22,10 @@ export const banCommand: EcCommand = {
         .setRequired(true)
     )
     .toJSON(),
-  async execute(interaction: CommandInteraction, guildId: string | null) {
+  async execute(
+    interaction: ChatInputCommandInteraction,
+    guildId: string | null
+  ) {
     await interaction.deferReply();
     const banManager = Container.get(GuildManager);
     try {

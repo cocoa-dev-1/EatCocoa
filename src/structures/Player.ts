@@ -27,6 +27,7 @@ import { defaultImage } from "../utils/asset";
 import { winstonLogger } from "../utils/winston";
 import { client } from "../index";
 import { throws } from "assert";
+import { music } from "../index";
 
 export class Player {
   public queue: PlayerItem[];
@@ -150,7 +151,6 @@ export class Player {
   }
 
   async remove() {
-    const { music } = client;
     await music.removePlayer(this.textChannel.guild.id);
   }
 

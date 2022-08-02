@@ -10,6 +10,7 @@ import {
   SelectMenuComponentOptionData,
   SelectMenuInteraction,
   MessageActionRowComponentBuilder,
+  ChatInputCommandInteraction,
 } from "discord.js";
 import { Service } from "typedi";
 import { allCommands } from "../commands";
@@ -21,7 +22,7 @@ import { defaultImage } from "../utils/asset";
 export class HelpManager {
   constructor() {}
 
-  async createHelpMessage(interaction: CommandInteraction) {
+  async createHelpMessage(interaction: ChatInputCommandInteraction) {
     const embed = new EmbedBuilder({
       author: {
         name: "코코아 봇",

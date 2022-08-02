@@ -5,7 +5,6 @@ import { Repository } from "typeorm";
 import { PlayList } from "../entities/PlayList";
 import { Song } from "../entities/Song";
 import { ECDataSource } from "../loader/typeormLoader";
-import { EcCommandInteraction } from "../types/command";
 import { DiscordColor } from "../types/discord";
 import { EcSendMessageOption } from "../types/message";
 import { defaultImage } from "../utils/asset";
