@@ -1,11 +1,8 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
+import { ChatInputCommandInteraction } from "discord.js";
 import Container from "typedi";
 import { GuildVoiceManager } from "../../services/GuildVoiceManager";
-import {
-  CommandCategory,
-  EcCommand,
-  EcCommandInteraction,
-} from "../../types/command";
+import { CommandCategory, EcCommand } from "../../types/command";
 
 export const loopCommand: EcCommand = {
   name: "반복",
@@ -15,7 +12,7 @@ export const loopCommand: EcCommand = {
     .setName("반복")
     .setDescription("현재 플레이 리스트를 반복재생/해제 합니다.")
     .toJSON(),
-  async execute(interaction: EcCommandInteraction, guildId: string) {
+  async execute(interaction: ChatInputCommandInteraction, guildId: string) {
     await interaction.deferReply();
     const guildVoiceManager = Container.get(GuildVoiceManager);
     const canLoop = await guildVoiceManager.check(interaction, guildId);

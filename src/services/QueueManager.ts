@@ -1,14 +1,13 @@
-import { MessageEmbed } from "discord.js";
+import { ChatInputCommandInteraction, EmbedBuilder } from "discord.js";
 import { Service } from "typedi";
 import { Player } from "../structures/Player";
-import { EcCommandInteraction } from "../types/command";
 
 @Service()
 export class QueueManager {
   constructor() {}
 
   async createEmbedList(
-    interaction: EcCommandInteraction,
+    interaction: ChatInputCommandInteraction,
     musicPlayer: Player
   ) {
     const queue = musicPlayer.getRemainingQueue();
@@ -23,7 +22,7 @@ export class QueueManager {
           return `${++j}) [${track.title}](${track.url})`;
         })
         .join("\n");
-      const embed = new MessageEmbed({
+      const embed = new EmbedBuilder({
         title: "남은 노래 리스트",
         description: `**[현재 재생중: ${musicPlayer.current.title}](${musicPlayer.current.url})**\n${info}`,
       });
@@ -32,14 +31,14 @@ export class QueueManager {
     return embeds;
   }
 
-  checkNext(embedList: MessageEmbed[], page: number) {
+  checkNext(embedList: EmbedBuilder[], page: number) {
     if (page === embedList.length) {
       return false;
     } else {
       return true;
     }
   }
-  checkLast(embedList: MessageEmbed[], page: number) {
+  checkLast(embedList: EmbedBuilder[], page: number) {
     if (page <= 1) {
       return false;
     } else {

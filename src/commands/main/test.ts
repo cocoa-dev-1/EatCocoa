@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { CommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction } from "discord.js";
 import { CommandCategory, EcCommand } from "../../types/command";
 
 export const testCommand: EcCommand = {
@@ -10,7 +10,7 @@ export const testCommand: EcCommand = {
     .setName("테스트")
     .setDescription("테스트 커맨드 입니다.")
     .toJSON(),
-  async execute(interaction: CommandInteraction, guildId: string) {
+  async execute(interaction: ChatInputCommandInteraction, guildId: string) {
     await interaction.reply("테스트 하는중...");
   },
 };

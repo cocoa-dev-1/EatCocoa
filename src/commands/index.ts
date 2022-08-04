@@ -1,5 +1,9 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { Collection, CommandInteraction } from "discord.js";
+import {
+  ChatInputCommandInteraction,
+  Collection,
+  CommandInteraction,
+} from "discord.js";
 import Container from "typedi";
 import { HelpManager } from "../services/HelpManager";
 import { CommandCategory, EcCommand } from "../types/command";
@@ -16,7 +20,7 @@ export const helpCommand: EcCommand = {
     .setName("도움말")
     .setDescription("코코아 봇의 사용법을 알아보세요.")
     .toJSON(),
-  async execute(interaction: CommandInteraction, guildId: string) {
+  async execute(interaction: ChatInputCommandInteraction, guildId: string) {
     await Container.get(HelpManager).createHelpMessage(interaction);
   },
 };

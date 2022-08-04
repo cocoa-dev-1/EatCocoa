@@ -1,5 +1,7 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import {
+  ChatInputCommandInteraction,
+  ComponentType,
   Interaction,
   InteractionCollector,
   Message,
@@ -8,12 +10,7 @@ import {
 } from "discord.js";
 import Container from "typedi";
 import { GuildVoiceManager } from "../../services/GuildVoiceManager";
-import {
-  CommandCategory,
-  EcCommand,
-  EcCommandInteraction,
-} from "../../types/command";
-import { playCommand } from "./play";
+import { CommandCategory, EcCommand } from "../../types/command";
 
 export const searchCommand: EcCommand = {
   name: "검색",
@@ -29,16 +26,18 @@ export const searchCommand: EcCommand = {
         .setRequired(true)
     )
     .toJSON(),
-  async execute(interaction: EcCommandInteraction, guildId: string) {
+  async execute(interaction: ChatInputCommandInteraction, guildId: string) {
     await interaction.deferReply();
     const guildVoiceManager = Container.get(GuildVoiceManager);
     const canSearch = await guildVoiceManager.check(interaction, guildId);
     if (canSearch) {
       await guildVoiceManager.search(interaction);
       const collector =
-        interaction.channel.createMessageComponentCollector<"ACTION_ROW">({
-          time: 30000,
-        });
+        interaction.channel.createMessageComponentCollector<ComponentType.SelectMenu>(
+          {
+            time: 30000,
+          }
+        );
       collector.on("collect", async (i: MessageComponentInteraction) => {
         if (i.customId === "search" && i.isSelectMenu()) {
           await i.update({

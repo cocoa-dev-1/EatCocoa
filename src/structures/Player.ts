@@ -1,7 +1,7 @@
 import { PlayerItem, PlayerOption } from "../types/player";
 import {
   GuildTextBasedChannel,
-  MessageEmbed,
+  EmbedBuilder,
   VoiceBasedChannel,
 } from "discord.js";
 import { Item, Result } from "ytpl";
@@ -13,6 +13,7 @@ import {
   createAudioPlayer,
   createAudioResource,
   demuxProbe,
+  DiscordGatewayAdapterCreator,
   entersState,
   joinVoiceChannel,
   NoSubscriberBehavior,
@@ -26,6 +27,7 @@ import { defaultImage } from "../utils/asset";
 import { winstonLogger } from "../utils/winston";
 import { client } from "../index";
 import { throws } from "assert";
+import { music } from "../index";
 
 export class Player {
   public queue: PlayerItem[];
@@ -88,7 +90,7 @@ export class Player {
   }
 
   async nextQueue() {
-    if ((this.queue.length - 1 > this.position) || this.endless) {
+    if (this.queue.length - 1 > this.position || this.endless) {
       this.setNextPosition();
       this.current = this.getCurrentQueue(this.position);
       const readableStream = await playdl.stream(this.current.url, {
@@ -149,7 +151,6 @@ export class Player {
   }
 
   async remove() {
-    const { music } = client;
     await music.removePlayer(this.textChannel.guild.id);
   }
 
@@ -158,7 +159,8 @@ export class Player {
     this.connection = joinVoiceChannel({
       channelId: this.voiceChannel.id,
       guildId: this.voiceChannel.guild.id,
-      adapterCreator: this.voiceChannel.guild.voiceAdapterCreator,
+      adapterCreator: channel.guild
+        .voiceAdapterCreator as unknown as DiscordGatewayAdapterCreator,
     });
     this.bindConnectionEvent();
   }
@@ -257,9 +259,9 @@ export class Player {
   }
 
   async sendMessage(channel: GuildTextBasedChannel, message: string) {
-    const embed = new MessageEmbed({
+    const embed = new EmbedBuilder({
       title: message,
-      timestamp: new Date(),
+      timestamp: Date.now(),
       footer: {
         text: "코코아 봇",
         iconURL: defaultImage,

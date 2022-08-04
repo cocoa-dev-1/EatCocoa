@@ -1,11 +1,8 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
+import { ChatInputCommandInteraction } from "discord.js";
 import Container from "typedi";
 import { PlayListManager } from "../../services/PlayListManager";
-import {
-  CommandCategory,
-  EcCommand,
-  EcCommandInteraction,
-} from "../../types/command";
+import { CommandCategory, EcCommand } from "../../types/command";
 
 export const getCommand: EcCommand = {
   name: "리스트검색",
@@ -21,7 +18,7 @@ export const getCommand: EcCommand = {
         .setRequired(true)
     )
     .toJSON(),
-  async execute(interaction: EcCommandInteraction, guildId: string) {
+  async execute(interaction: ChatInputCommandInteraction, guildId: string) {
     await interaction.deferReply();
     const playListManager = Container.get(PlayListManager);
     const playListName = interaction.options.getString("이름");

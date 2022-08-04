@@ -16,6 +16,7 @@ export const slashCommandManager: EcEvent = {
       try {
         await command.execute(interaction, interaction.guildId);
       } catch (error) {
+        console.log(error);
         winstonLogger.error(error);
         logger.error("Error while executing command: " + command.name);
         await interaction.editReply({

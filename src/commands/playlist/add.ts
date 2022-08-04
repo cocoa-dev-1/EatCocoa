@@ -1,12 +1,9 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
+import { ChatInputCommandInteraction } from "discord.js";
 import Container from "typedi";
 import { PlayListManager } from "../../services/PlayListManager";
 import { YtManager } from "../../services/YtManager";
-import {
-  CommandCategory,
-  EcCommand,
-  EcCommandInteraction,
-} from "../../types/command";
+import { CommandCategory, EcCommand } from "../../types/command";
 import { DiscordColor } from "../../types/discord";
 
 export const addCommand: EcCommand = {
@@ -29,7 +26,7 @@ export const addCommand: EcCommand = {
         .setRequired(true)
     )
     .toJSON(),
-  async execute(interaction: EcCommandInteraction, guildId: string) {
+  async execute(interaction: ChatInputCommandInteraction, guildId: string) {
     await interaction.deferReply();
     const playListName = interaction.options.getString("이름");
     const songUrl = interaction.options.getString("노래");
@@ -49,7 +46,7 @@ export const addCommand: EcCommand = {
           await playListManager.sendMessage({
             interaction: interaction,
             title: "노래를 추가하던중 에러가 발생했습니다.",
-            color: DiscordColor.RED,
+            color: DiscordColor.Red,
           });
         }
       } else {
@@ -57,7 +54,7 @@ export const addCommand: EcCommand = {
           interaction: interaction,
           title: "유튜브 url이 아닙니다.",
           msg: `입력된 링크: ${songUrl}`,
-          color: DiscordColor.RED,
+          color: DiscordColor.Red,
         });
       }
     } else {
@@ -65,7 +62,7 @@ export const addCommand: EcCommand = {
         interaction: interaction,
         title: "존재하지 않는 플레이 리스트입니다.",
         msg: `이름: ${playListName}`,
-        color: DiscordColor.RED,
+        color: DiscordColor.Red,
       });
     }
   },

@@ -1,13 +1,9 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { DiscordColor } from "../../types/discord";
-import { CommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction, CommandInteraction } from "discord.js";
 import Container from "typedi";
 import { PlayListManager } from "../../services/PlayListManager";
-import {
-  CommandCategory,
-  EcCommand,
-  EcCommandInteraction,
-} from "../../types/command";
+import { CommandCategory, EcCommand } from "../../types/command";
 
 export const createCommand: EcCommand = {
   name: "생성",
@@ -23,7 +19,7 @@ export const createCommand: EcCommand = {
         .setRequired(true)
     )
     .toJSON(),
-  async execute(interaction: EcCommandInteraction, guildId: string) {
+  async execute(interaction: ChatInputCommandInteraction, guildId: string) {
     await interaction.deferReply();
     const playListManager = Container.get(PlayListManager);
     const listName = interaction.options.getString("이름");
@@ -43,7 +39,7 @@ export const createCommand: EcCommand = {
         await playListManager.sendMessage({
           interaction: interaction,
           title: "플레이 리스트를 생성하던중 오류가 발생했습니다.",
-          color: DiscordColor.RED,
+          color: DiscordColor.Red,
         });
       }
     } else {
@@ -51,7 +47,7 @@ export const createCommand: EcCommand = {
         interaction: interaction,
         title: "이미 존재하는 플레이리스트 이름입니다.",
         msg: `이름: ${listName}`,
-        color: DiscordColor.RED,
+        color: DiscordColor.Red,
       });
     }
   },

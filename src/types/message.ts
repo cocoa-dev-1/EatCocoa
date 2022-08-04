@@ -1,9 +1,9 @@
-import { EcCommandInteraction } from "./command";
+import { ChatInputCommandInteraction } from "discord.js";
 import { DiscordColor } from "./discord";
 
 export interface EcSendMessageOption {
   title: string;
-  interaction: EcCommandInteraction;
+  interaction: ChatInputCommandInteraction;
   msg?: string;
   color?: DiscordColor;
 }

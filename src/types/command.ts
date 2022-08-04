@@ -48,7 +48,3 @@ export enum CommandPermission {
   BAN_MEMBERS = 2,
   ADMIN = 3,
 }
-
-export interface EcCommandInteraction extends CommandInteraction {
-  client: EatCocoa;
-}

@@ -1,16 +1,20 @@
 import {
   Guild,
+  GuildBasedChannel,
+  GuildChannel,
   Message,
-  MessageActionRow,
-  MessageEmbed,
-  MessageSelectMenu,
-  MessageSelectOptionData,
+  ActionRowBuilder,
+  EmbedBuilder,
+  SelectMenuBuilder,
   VoiceBasedChannel,
+  SelectMenuComponentOptionData,
+  MessageActionRowComponentBuilder,
+  ChatInputCommandInteraction,
 } from "discord.js";
 import { getVoiceConnection } from "@discordjs/voice";
 import { Service } from "typedi";
 import { Player } from "../structures/Player";
-import { EcCommand, EcCommandInteraction } from "../types/command";
+import { EcCommand } from "../types/command";
 import { DiscordColor } from "../types/discord";
 import { defaultImage } from "../utils/asset";
 import { YtManager } from "./YtManager";
@@ -18,23 +22,22 @@ import { Item, Video } from "ytsr";
 import { Result } from "ytpl";
 import { Manager } from "../structures/Manager";
 import { title } from "process";
+import { music } from "../index";
 
 @Service()
 export class GuildVoiceManager {
   constructor(public ytManager: YtManager) {}
 
-  async hasPlayer(interaction: EcCommandInteraction) {
-    const { music } = interaction.client;
+  async hasPlayer(interaction: ChatInputCommandInteraction) {
     const checkPlayer = await music.hasPlayer(interaction.guild.id);
     return checkPlayer;
   }
 
   async getPlayer(
-    interaction: EcCommandInteraction,
+    interaction: ChatInputCommandInteraction,
     guildId: string,
     create?: boolean
   ) {
-    const { music } = interaction.client;
     let musicPlayer = await music.getPlayer(guildId);
     if (musicPlayer === undefined) {
       if (create) {
@@ -49,22 +52,29 @@ export class GuildVoiceManager {
   }
 
   async check(
-    interaction: EcCommandInteraction,
+    interaction: ChatInputCommandInteraction,
     guildId: string
   ): Promise<boolean> {
     const isInVoice = await this.inVoiceCheck(interaction);
-    const botVoiceChannel = interaction.guild.me.voice.channel;
     if (isInVoice) {
-      if (botVoiceChannel) {
-        const isInSameVoice = await this.inSameVoiceCheck(
-          interaction,
-          botVoiceChannel
+      const connection = getVoiceConnection(interaction.guild.id);
+      if (connection !== undefined) {
+        const botVoiceChannel = await interaction.guild.channels.cache.get(
+          connection.joinConfig.channelId
         );
-        if (isInSameVoice) {
-          return true;
+        if (botVoiceChannel) {
+          const isInSameVoice = await this.inSameVoiceCheck(
+            interaction,
+            botVoiceChannel
+          );
+          if (isInSameVoice) {
+            return true;
+          } else {
+            await this.Error(interaction, "같은 음성방에 들어가있지 않습니다.");
+            return false;
+          }
         } else {
-          await this.Error(interaction, "같은 음성방에 들어가있지 않습니다.");
-          return false;
+          return true;
         }
       } else {
         return true;
@@ -75,32 +85,34 @@ export class GuildVoiceManager {
     }
   }
 
-  async inVoiceCheck(interaction: EcCommandInteraction): Promise<boolean> {
+  async inVoiceCheck(
+    interaction: ChatInputCommandInteraction
+  ): Promise<boolean> {
     const channel = await this.getUserVoiceChannel(interaction);
     if (channel) return true;
     else return false;
   }
 
   async inSameVoiceCheck(
-    interaction: EcCommandInteraction,
-    botVoiceChannel: VoiceBasedChannel
+    interaction: ChatInputCommandInteraction,
+    botVoiceChannel: GuildBasedChannel
   ): Promise<boolean> {
     const channel = await this.getUserVoiceChannel(interaction);
-    if (botVoiceChannel.equals(channel)) {
+    if (botVoiceChannel.id === channel.id) {
       return true;
     } else {
       return false;
     }
   }
 
-  async getUserVoiceChannel(interaction: EcCommandInteraction) {
+  async getUserVoiceChannel(interaction: ChatInputCommandInteraction) {
     const user = interaction.guild.members.cache.get(interaction.user.id);
     const channel = user.voice.channel;
     return channel;
   }
 
   async play(
-    interaction: EcCommandInteraction,
+    interaction: ChatInputCommandInteraction,
     musicPlayer: Player,
     url: string
   ) {
@@ -155,7 +167,7 @@ export class GuildVoiceManager {
   }
 
   async playSuccess(
-    interaction: EcCommandInteraction,
+    interaction: ChatInputCommandInteraction,
     musicPlayer: Player,
     list?: Result
   ) {
@@ -163,11 +175,11 @@ export class GuildVoiceManager {
     let title = list ? "플레이 리스트를 추가했습니다." : "노래를 추가했습니다.";
     let description = list?.title || music.title;
     let thumbnail = list?.bestThumbnail || music.thumbnail;
-    const embed = new MessageEmbed({
+    const embed = new EmbedBuilder({
       title: title,
       description: description,
       image: thumbnail,
-      timestamp: new Date(),
+      timestamp: Date.now(),
       footer: {
         text: "코코아 봇",
         iconURL: defaultImage,
@@ -178,7 +190,7 @@ export class GuildVoiceManager {
     });
   }
 
-  async stop(interaction: EcCommandInteraction, musicPlayer: Player) {
+  async stop(interaction: ChatInputCommandInteraction, musicPlayer: Player) {
     if (musicPlayer.playing || musicPlayer.queue.length > 0) {
       await musicPlayer.stop();
       await this.stopSuccess(interaction, "노래 재생을 종료했습니다.");
@@ -187,10 +199,10 @@ export class GuildVoiceManager {
     }
   }
 
-  async stopSuccess(interaction: EcCommandInteraction, msg: string) {
-    const embed = new MessageEmbed({
+  async stopSuccess(interaction: ChatInputCommandInteraction, msg: string) {
+    const embed = new EmbedBuilder({
       title: msg,
-      timestamp: new Date(),
+      timestamp: Date.now(),
       footer: {
         text: "코코아 봇",
         iconURL: defaultImage,
@@ -201,7 +213,7 @@ export class GuildVoiceManager {
     });
   }
 
-  async pause(interaction: EcCommandInteraction) {
+  async pause(interaction: ChatInputCommandInteraction) {
     const musicPlayer = await this.getPlayer(interaction, interaction.guild.id);
     if (musicPlayer?.playing) {
       const pause = await musicPlayer.pause();
@@ -221,7 +233,7 @@ export class GuildVoiceManager {
   }
 
   async pauseSuccess(
-    interaction: EcCommandInteraction,
+    interaction: ChatInputCommandInteraction,
     type: "pause" | "resume"
   ) {
     let title = "";
@@ -230,9 +242,9 @@ export class GuildVoiceManager {
     } else if (type === "resume") {
       title = "노래를 다시 재생합니다.";
     }
-    const embed = new MessageEmbed({
+    const embed = new EmbedBuilder({
       title: title,
-      timestamp: new Date(),
+      timestamp: Date.now(),
       footer: {
         text: "코코아 봇",
         iconURL: defaultImage,
@@ -243,7 +255,7 @@ export class GuildVoiceManager {
     });
   }
 
-  async skip(interaction: EcCommandInteraction) {
+  async skip(interaction: ChatInputCommandInteraction) {
     const musicPlayer = await this.getPlayer(interaction, interaction.guild.id);
     const currentSong = musicPlayer.current.title;
     if (musicPlayer) {
@@ -256,11 +268,11 @@ export class GuildVoiceManager {
     }
   }
 
-  async skipSuccess(interaction: EcCommandInteraction, msg: string) {
-    const embed = new MessageEmbed({
+  async skipSuccess(interaction: ChatInputCommandInteraction, msg: string) {
+    const embed = new EmbedBuilder({
       title: "노래를 스킵했습니다.",
       description: msg,
-      timestamp: new Date(),
+      timestamp: Date.now(),
       footer: {
         text: "코코아 봇",
         iconURL: defaultImage,
@@ -271,19 +283,20 @@ export class GuildVoiceManager {
     });
   }
 
-  async search(interaction: EcCommandInteraction) {
+  async search(interaction: ChatInputCommandInteraction) {
     const song = interaction.options.getString("song");
     const result = await this.ytManager.search(song);
-    const resultActionList = new MessageActionRow().addComponents(
-      new MessageSelectMenu()
-        .setCustomId("search")
-        .setPlaceholder("노래를 선택하세요.")
-        .addOptions(await this.createResultOptions(result))
-    );
-    const embed = new MessageEmbed({
+    const resultActionList =
+      new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
+        new SelectMenuBuilder()
+          .setCustomId("search")
+          .setPlaceholder("노래를 선택하세요.")
+          .addOptions(this.createResultOptions(result))
+      );
+    const embed = new EmbedBuilder({
       title: "노래를 선택하세요",
       description: "30초 안에 선택해야합니다",
-      timestamp: new Date(),
+      timestamp: Date.now(),
       footer: {
         text: "코코아 봇",
         iconURL: defaultImage,
@@ -296,25 +309,25 @@ export class GuildVoiceManager {
     //await this.createActionList(result);
   }
 
-  async createResultOptions(
-    result: Item[]
-  ): Promise<MessageSelectOptionData[]> {
+  createResultOptions(result: Item[]): SelectMenuComponentOptionData[] {
     const resultOptions = result.map((element) => {
       if (element.type === "video") {
         if (element.title !== undefined || element.title !== null) {
           return {
             label: element.title,
-            description: element.description,
+            description: element.description || undefined,
             value: element.url,
           };
         }
       }
     });
-    const finalResult = resultOptions.filter((data) => data !== undefined);
+    const finalResult = resultOptions.filter(
+      (data) => data !== undefined && data !== null
+    );
     return finalResult;
   }
 
-  async loop(interaction: EcCommandInteraction) {
+  async loop(interaction: ChatInputCommandInteraction) {
     const musicPlayer = await this.getPlayer(interaction, interaction.guild.id);
     if (musicPlayer) {
       const loopResult = musicPlayer.loop();
@@ -332,10 +345,10 @@ export class GuildVoiceManager {
     }
   }
 
-  async loopSuccess(interaction: EcCommandInteraction, msg: string) {
-    const embed = new MessageEmbed({
+  async loopSuccess(interaction: ChatInputCommandInteraction, msg: string) {
+    const embed = new EmbedBuilder({
       title: msg,
-      timestamp: new Date(),
+      timestamp: Date.now(),
       footer: {
         text: "코코아 봇",
         iconURL: defaultImage,
@@ -346,12 +359,12 @@ export class GuildVoiceManager {
     });
   }
 
-  async Error(interaction: EcCommandInteraction, msg: string) {
-    const embed = new MessageEmbed({
+  async Error(interaction: ChatInputCommandInteraction, msg: string) {
+    const embed = new EmbedBuilder({
       title: "에러",
       description: msg,
-      color: DiscordColor.RED,
-      timestamp: new Date(),
+      color: DiscordColor.Red,
+      timestamp: Date.now(),
       footer: {
         text: "코코아 봇",
         iconURL: defaultImage,

@@ -1,11 +1,10 @@
-import { MessageEmbed, User } from "discord.js";
+import { Colors, EmbedBuilder, User } from "discord.js";
 import { logger } from "../utils/logger";
 import Container, { Service } from "typedi";
 import { Repository } from "typeorm";
 import { PlayList } from "../entities/PlayList";
 import { Song } from "../entities/Song";
 import { ECDataSource } from "../loader/typeormLoader";
-import { EcCommandInteraction } from "../types/command";
 import { DiscordColor } from "../types/discord";
 import { EcSendMessageOption } from "../types/message";
 import { defaultImage } from "../utils/asset";
@@ -13,6 +12,7 @@ import { winstonLogger } from "../utils/winston";
 import { SongManager } from "./SongManager";
 import { YtManager } from "./YtManager";
 import { SongDetailManager } from "./SongDetailManager";
+import { EmbedType } from "discord-api-types/v10";
 
 @Service()
 export class PlayListManager {
@@ -84,11 +84,11 @@ export class PlayListManager {
   }
 
   async sendMessage(option: EcSendMessageOption) {
-    const embed = new MessageEmbed({
+    const embed = new EmbedBuilder({
       title: option.title,
       description: option?.msg || null,
       color: option?.color || null,
-      timestamp: new Date(),
+      timestamp: Date.now(),
       footer: {
         text: "코코아 봇",
         iconURL: defaultImage,
