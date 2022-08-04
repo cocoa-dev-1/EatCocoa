@@ -56,21 +56,25 @@ export class GuildVoiceManager {
     guildId: string
   ): Promise<boolean> {
     const isInVoice = await this.inVoiceCheck(interaction);
-    const connection = getVoiceConnection(interaction.guild.id);
-    const botVoiceChannel = await interaction.guild.channels.cache.get(
-      connection.joinConfig.channelId
-    );
     if (isInVoice) {
-      if (botVoiceChannel) {
-        const isInSameVoice = await this.inSameVoiceCheck(
-          interaction,
-          botVoiceChannel
+      const connection = getVoiceConnection(interaction.guild.id);
+      if (connection !== undefined) {
+        const botVoiceChannel = await interaction.guild.channels.cache.get(
+          connection.joinConfig.channelId
         );
-        if (isInSameVoice) {
-          return true;
+        if (botVoiceChannel) {
+          const isInSameVoice = await this.inSameVoiceCheck(
+            interaction,
+            botVoiceChannel
+          );
+          if (isInSameVoice) {
+            return true;
+          } else {
+            await this.Error(interaction, "같은 음성방에 들어가있지 않습니다.");
+            return false;
+          }
         } else {
-          await this.Error(interaction, "같은 음성방에 들어가있지 않습니다.");
-          return false;
+          return true;
         }
       } else {
         return true;
@@ -175,7 +179,7 @@ export class GuildVoiceManager {
       title: title,
       description: description,
       image: thumbnail,
-      timestamp: new Date(),
+      timestamp: Date.now(),
       footer: {
         text: "코코아 봇",
         iconURL: defaultImage,
@@ -198,7 +202,7 @@ export class GuildVoiceManager {
   async stopSuccess(interaction: ChatInputCommandInteraction, msg: string) {
     const embed = new EmbedBuilder({
       title: msg,
-      timestamp: new Date(),
+      timestamp: Date.now(),
       footer: {
         text: "코코아 봇",
         iconURL: defaultImage,
@@ -240,7 +244,7 @@ export class GuildVoiceManager {
     }
     const embed = new EmbedBuilder({
       title: title,
-      timestamp: new Date(),
+      timestamp: Date.now(),
       footer: {
         text: "코코아 봇",
         iconURL: defaultImage,
@@ -268,7 +272,7 @@ export class GuildVoiceManager {
     const embed = new EmbedBuilder({
       title: "노래를 스킵했습니다.",
       description: msg,
-      timestamp: new Date(),
+      timestamp: Date.now(),
       footer: {
         text: "코코아 봇",
         iconURL: defaultImage,
@@ -287,12 +291,12 @@ export class GuildVoiceManager {
         new SelectMenuBuilder()
           .setCustomId("search")
           .setPlaceholder("노래를 선택하세요.")
-          .addOptions(await this.createResultOptions(result))
+          .addOptions(this.createResultOptions(result))
       );
     const embed = new EmbedBuilder({
       title: "노래를 선택하세요",
       description: "30초 안에 선택해야합니다",
-      timestamp: new Date(),
+      timestamp: Date.now(),
       footer: {
         text: "코코아 봇",
         iconURL: defaultImage,
@@ -305,21 +309,21 @@ export class GuildVoiceManager {
     //await this.createActionList(result);
   }
 
-  async createResultOptions(
-    result: Item[]
-  ): Promise<SelectMenuComponentOptionData[]> {
+  createResultOptions(result: Item[]): SelectMenuComponentOptionData[] {
     const resultOptions = result.map((element) => {
       if (element.type === "video") {
         if (element.title !== undefined || element.title !== null) {
           return {
             label: element.title,
-            description: element.description,
+            description: element.description || undefined,
             value: element.url,
           };
         }
       }
     });
-    const finalResult = resultOptions.filter((data) => data !== undefined);
+    const finalResult = resultOptions.filter(
+      (data) => data !== undefined && data !== null
+    );
     return finalResult;
   }
 
@@ -344,7 +348,7 @@ export class GuildVoiceManager {
   async loopSuccess(interaction: ChatInputCommandInteraction, msg: string) {
     const embed = new EmbedBuilder({
       title: msg,
-      timestamp: new Date(),
+      timestamp: Date.now(),
       footer: {
         text: "코코아 봇",
         iconURL: defaultImage,
@@ -360,7 +364,7 @@ export class GuildVoiceManager {
       title: "에러",
       description: msg,
       color: DiscordColor.Red,
-      timestamp: new Date(),
+      timestamp: Date.now(),
       footer: {
         text: "코코아 봇",
         iconURL: defaultImage,

@@ -15,7 +15,13 @@ import { ActivityType } from "discord-api-types/v10";
 import { Manager } from "./structures/Manager";
 
 export const client = new EatCocoa({
-  intents: [GatewayIntentBits.Guilds],
+  intents: [
+    GatewayIntentBits.MessageContent,
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildMessages,
+    GatewayIntentBits.GuildVoiceStates,
+    GatewayIntentBits.GuildPresences,
+  ],
   partials: [Partials.Channel],
 });
 

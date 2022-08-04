@@ -261,7 +261,7 @@ export class Player {
   async sendMessage(channel: GuildTextBasedChannel, message: string) {
     const embed = new EmbedBuilder({
       title: message,
-      timestamp: new Date(),
+      timestamp: Date.now(),
       footer: {
         text: "코코아 봇",
         iconURL: defaultImage,

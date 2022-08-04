@@ -88,7 +88,7 @@ export class PlayListManager {
       title: option.title,
       description: option?.msg || null,
       color: option?.color || null,
-      timestamp: new Date(),
+      timestamp: Date.now(),
       footer: {
         text: "코코아 봇",
         iconURL: defaultImage,

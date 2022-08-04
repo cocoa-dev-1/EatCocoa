@@ -88,7 +88,7 @@ export class GuildManager {
       title: "차단 되었습니다.",
       description: `<@${targetUser.id}> 님이 차단되었습니다.`,
       color: DiscordColor.Red,
-      timestamp: new Date(),
+      timestamp: Date.now(),
       footer: {
         text: "코코아 봇",
         iconURL: defaultImage,
@@ -107,7 +107,7 @@ export class GuildManager {
       title: "차단해제 되었습니다.",
       description: `<@${targetUser.id}> 님이 차단해제 되었습니다.`,
       color: DiscordColor.Green,
-      timestamp: new Date(),
+      timestamp: Date.now(),
       footer: {
         text: "코코아 봇",
         iconURL: defaultImage,
@@ -126,7 +126,7 @@ export class GuildManager {
       title: "에러",
       description: msg,
       color: DiscordColor.Red,
-      timestamp: new Date(),
+      timestamp: Date.now(),
       footer: {
         text: "코코아 봇",
         iconURL: defaultImage,

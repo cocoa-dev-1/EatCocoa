@@ -10,12 +10,7 @@ import {
 } from "discord.js";
 import Container from "typedi";
 import { GuildVoiceManager } from "../../services/GuildVoiceManager";
-import {
-  CommandCategory,
-  EcCommand,
-  EcCommandInteraction,
-} from "../../types/command";
-import { playCommand } from "./play";
+import { CommandCategory, EcCommand } from "../../types/command";
 
 export const searchCommand: EcCommand = {
   name: "검색",

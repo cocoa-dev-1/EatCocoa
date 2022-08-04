@@ -2,4 +2,4 @@ import { EcCommand } from "../../types/command";
 import { addCommand } from "./add";
 import { createCommand } from "./create";
 
-export const playlistCommands: EcCommand[] = [createCommand, addCommand];
+export const playlistCommands: EcCommand[] = [];

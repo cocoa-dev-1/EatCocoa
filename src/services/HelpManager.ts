@@ -37,7 +37,7 @@ export class HelpManager {
         text: "코코아 봇",
         iconURL: defaultImage,
       },
-      timestamp: new Date(),
+      timestamp: Date.now(),
     });
 
     const helpRow =
@@ -78,7 +78,7 @@ export class HelpManager {
       thumbnail: {
         url: defaultImage,
       },
-      timestamp: new Date(),
+      timestamp: Date.now(),
       footer: {
         text: "코코아 봇",
         iconURL: defaultImage,

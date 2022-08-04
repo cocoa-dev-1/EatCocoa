@@ -1,13 +1,9 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import { DiscordColor } from "../../types/discord";
-import { CommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction, CommandInteraction } from "discord.js";
 import Container from "typedi";
 import { PlayListManager } from "../../services/PlayListManager";
-import {
-  CommandCategory,
-  EcCommand,
-  EcCommandInteraction,
-} from "../../types/command";
+import { CommandCategory, EcCommand } from "../../types/command";
 
 export const createCommand: EcCommand = {
   name: "생성",
@@ -23,7 +19,7 @@ export const createCommand: EcCommand = {
         .setRequired(true)
     )
     .toJSON(),
-  async execute(interaction: EcCommandInteraction, guildId: string) {
+  async execute(interaction: ChatInputCommandInteraction, guildId: string) {
     await interaction.deferReply();
     const playListManager = Container.get(PlayListManager);
     const listName = interaction.options.getString("이름");
