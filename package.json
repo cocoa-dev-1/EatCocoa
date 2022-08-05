@@ -10,7 +10,8 @@
     "serve": "node build/src/bot.js",
     "typeorm": "typeorm-ts-node-commonjs",
     "ts-node": "ts-node -r tsconfig-paths/register ./src/bot.ts",
-    "start:pm2": "pm2 start ts-node -- --type-check -r tsconfig-paths/register ./src/bot.ts"
+    "start:pm2": "pm2 start ts-node -- --type-check -r tsconfig-paths/register ./src/bot.ts",
+    "shard": "node build/src/index.js"
   },
   "author": "코코아#2626",
   "license": "ISC",

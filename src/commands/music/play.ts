@@ -30,7 +30,7 @@ export const playCommand: EcCommand = {
     interaction: ChatInputCommandInteraction,
     guildId: string
   ): Promise<void> {
-    await interaction.deferReply({ ephemeral: true });
+    await interaction.deferReply();
     const guildVoiceManager = Container.get(GuildVoiceManager);
     const url = interaction.options.getString("노래");
     if (url) {
@@ -70,8 +70,8 @@ export const playCommand: EcCommand = {
             volume: 50,
             selfDeafen: true,
           });
+          player.connect();
         }
-        player.connect();
         if (!isPlayList) {
           player.queue.add(result.tracks[0]);
         } else {
