@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { ChatInputCommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction, Colors } from "discord.js";
 import Container from "typedi";
 import { GuildVoiceManager } from "../../services/GuildVoiceManager";
 import { CommandCategory, EcCommand } from "../../types/command";
@@ -15,9 +15,22 @@ export const pauseCommand: EcCommand = {
   async execute(interaction: ChatInputCommandInteraction, guildId) {
     await interaction.deferReply();
     const guildVoiceManager = Container.get(GuildVoiceManager);
-    const canPause = await guildVoiceManager.check(interaction, guildId);
-    if (canPause) {
-      await guildVoiceManager.pause(interaction);
+    const [check, message] = await guildVoiceManager.check(interaction, {
+      inSameChannel: true,
+      inVoiceChannel: true,
+      isPlayerExist: true,
+    });
+    if (check) {
+      const result = await guildVoiceManager.pause(interaction);
+      const paused = result ? "일시정지" : "재생";
+      await guildVoiceManager.sendMessage(interaction, {
+        title: `노래를 ${paused} 합니다.`,
+      });
+    } else {
+      await guildVoiceManager.sendMessage(interaction, {
+        title: message,
+        color: Colors.Red,
+      });
     }
   },
 };

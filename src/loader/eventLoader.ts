@@ -1,5 +1,5 @@
 import { Client } from "discord.js";
-import { allEvents } from "../events";
+import { allEvents } from "../events/discord/index";
 import { logger } from "../utils/logger";
 
 export const loadEvents = (client: Client) => {

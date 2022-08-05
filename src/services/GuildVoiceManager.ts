@@ -1,377 +1,176 @@
 import {
-  Guild,
-  GuildBasedChannel,
-  GuildChannel,
-  Message,
-  ActionRowBuilder,
-  EmbedBuilder,
-  SelectMenuBuilder,
-  VoiceBasedChannel,
-  SelectMenuComponentOptionData,
-  MessageActionRowComponentBuilder,
   ChatInputCommandInteraction,
+  Embed,
+  EmbedBuilder,
+  EmbedData,
+  SelectMenuComponentOptionData,
+  VoiceBasedChannel,
 } from "discord.js";
-import { getVoiceConnection } from "@discordjs/voice";
+import { LoadType, SearchResult, Track } from "erela.js";
+import { invalid } from "moment";
 import { Service } from "typedi";
-import { Player } from "../structures/Player";
-import { EcCommand } from "../types/command";
-import { DiscordColor } from "../types/discord";
-import { defaultImage } from "../utils/asset";
-import { YtManager } from "./YtManager";
-import { Item, Video } from "ytsr";
-import { Result } from "ytpl";
-import { Manager } from "../structures/Manager";
-import { title } from "process";
-import { music } from "../index";
+import { manager } from "../loader/managerLoader";
+import { PlayerCheckOption } from "../types/player";
+import { defaultFooter, defaultThumbnail } from "../utils/asset";
+import { logger } from "../utils/logger";
+import { winstonLogger } from "../utils/winston";
 
 @Service()
 export class GuildVoiceManager {
-  constructor(public ytManager: YtManager) {}
+  constructor() {}
 
-  async hasPlayer(interaction: ChatInputCommandInteraction) {
-    const checkPlayer = await music.hasPlayer(interaction.guild.id);
-    return checkPlayer;
-  }
-
-  async getPlayer(
-    interaction: ChatInputCommandInteraction,
-    guildId: string,
-    create?: boolean
-  ) {
-    let musicPlayer = await music.getPlayer(guildId);
-    if (musicPlayer === undefined) {
-      if (create) {
-        musicPlayer = await music.newPlayer(guildId, {
-          textChannel: interaction.channel,
-        });
-      } else {
-        return null;
-      }
-    }
-    return musicPlayer;
-  }
-
-  async check(
-    interaction: ChatInputCommandInteraction,
-    guildId: string
-  ): Promise<boolean> {
-    const isInVoice = await this.inVoiceCheck(interaction);
-    if (isInVoice) {
-      const connection = getVoiceConnection(interaction.guild.id);
-      if (connection !== undefined) {
-        const botVoiceChannel = await interaction.guild.channels.cache.get(
-          connection.joinConfig.channelId
-        );
-        if (botVoiceChannel) {
-          const isInSameVoice = await this.inSameVoiceCheck(
-            interaction,
-            botVoiceChannel
-          );
-          if (isInSameVoice) {
-            return true;
-          } else {
-            await this.Error(interaction, "같은 음성방에 들어가있지 않습니다.");
-            return false;
-          }
-        } else {
-          return true;
-        }
-      } else {
-        return true;
-      }
-    } else {
-      await this.Error(interaction, "음성방에 들어가있지 않습니다.");
-      return false;
-    }
-  }
-
-  async inVoiceCheck(
-    interaction: ChatInputCommandInteraction
-  ): Promise<boolean> {
-    const channel = await this.getUserVoiceChannel(interaction);
-    if (channel) return true;
-    else return false;
-  }
-
-  async inSameVoiceCheck(
-    interaction: ChatInputCommandInteraction,
-    botVoiceChannel: GuildBasedChannel
-  ): Promise<boolean> {
-    const channel = await this.getUserVoiceChannel(interaction);
-    if (botVoiceChannel.id === channel.id) {
+  isExist(interaction: ChatInputCommandInteraction): boolean {
+    const player = manager.get(interaction.guild.id);
+    if (player) {
       return true;
     } else {
       return false;
     }
   }
 
-  async getUserVoiceChannel(interaction: ChatInputCommandInteraction) {
-    const user = interaction.guild.members.cache.get(interaction.user.id);
-    const channel = user.voice.channel;
-    return channel;
-  }
-
-  async play(
+  async check(
     interaction: ChatInputCommandInteraction,
-    musicPlayer: Player,
-    url: string
-  ) {
-    const validatedUrl = this.ytManager.validate(url);
-    const isList = this.ytManager.listCheck(url);
-    if (validatedUrl) {
-      const isList = this.ytManager.listCheck(url);
-      if (isList) {
-        const playList = await this.ytManager.getPlayList(url);
-        await musicPlayer.addList(playList);
-      } else {
-        const video = await this.ytManager.getVideoInfo(url);
-        const videoDetails = video.videoDetails;
-        await musicPlayer.add({
-          id: videoDetails.videoId,
-          title: videoDetails.title,
-          thumbnail: videoDetails.thumbnails[0],
-          url: videoDetails.video_url,
-        });
-        // await musicPlayer.add(videoDetails);
-      }
-    } else {
-      const videos = await this.ytManager.search(url);
-      if (!videos.length) {
-        return await this.Error(interaction, "곡을 찾지 못했습니다.");
-      }
-      if (videos[0].type === "video") {
-        await musicPlayer.add({
-          id: videos[0].id,
-          title: videos[0].title,
-          thumbnail: videos[0].bestThumbnail,
-          url: videos[0].url,
-        });
-      } else {
-        return await this.Error(interaction, "곡을 찾지 못했습니다.");
-      }
+    option: PlayerCheckOption
+  ): Promise<[boolean, string]> {
+    const userVoiceChannel = this.getUserVoiceChannel(interaction);
+    const player = manager.get(interaction.guild.id);
+    let inSameChannel = true;
+    if (player && userVoiceChannel) {
+      inSameChannel = userVoiceChannel.id === player.voiceChannel;
     }
-    if (isList) {
-      await this.playSuccess(
-        interaction,
-        musicPlayer,
-        await this.ytManager.getPlayList(url)
-      );
-    } else {
-      await this.playSuccess(interaction, musicPlayer);
+    if (option.inVoiceChannel && !userVoiceChannel) {
+      return [false, "음성채널에 접속해야합니다."];
     }
-    if (!musicPlayer.playing) {
-      const voiceChannel = await this.getUserVoiceChannel(interaction);
-      await musicPlayer.connect(voiceChannel);
-      await musicPlayer.play();
+    if (option.inSameChannel && !inSameChannel) {
+      return [false, "같은 음성방에 있어야 합니다."];
     }
+    if (option.isPlayerExist && !player) {
+      return [false, "플레이어가 없습니다."];
+    }
+    return [true, ""];
   }
 
-  async playSuccess(
+  async search(
     interaction: ChatInputCommandInteraction,
-    musicPlayer: Player,
-    list?: Result
-  ) {
-    const music = musicPlayer.queue[musicPlayer.queue.length - 1];
-    let title = list ? "플레이 리스트를 추가했습니다." : "노래를 추가했습니다.";
-    let description = list?.title || music.title;
-    let thumbnail = list?.bestThumbnail || music.thumbnail;
-    const embed = new EmbedBuilder({
-      title: title,
-      description: description,
-      image: thumbnail,
-      timestamp: Date.now(),
-      footer: {
-        text: "코코아 봇",
-        iconURL: defaultImage,
-      },
-    });
-    await interaction.editReply({
-      embeds: [embed],
-    });
+    song: string
+  ): Promise<[SearchResult, LoadType]> {
+    const result = await manager.search(song, interaction.member);
+    return [result, result.loadType];
   }
 
-  async stop(interaction: ChatInputCommandInteraction, musicPlayer: Player) {
-    if (musicPlayer.playing || musicPlayer.queue.length > 0) {
-      await musicPlayer.stop();
-      await this.stopSuccess(interaction, "노래 재생을 종료했습니다.");
-    } else {
-      await this.Error(interaction, "재생중인 곡이 없습니다.");
+  async loop(
+    interaction: ChatInputCommandInteraction
+  ): Promise<[string, boolean]> {
+    const player = manager.get(interaction.guild.id);
+    const type = interaction.options.getSubcommand();
+    if (type === "노래") {
+      player.setTrackRepeat(!player.trackRepeat);
+      return [type, player.trackRepeat];
+    } else if (type === "재생목록") {
+      player.setQueueRepeat(!player.queueRepeat);
+      return [type, player.queueRepeat];
     }
   }
 
-  async stopSuccess(interaction: ChatInputCommandInteraction, msg: string) {
-    const embed = new EmbedBuilder({
-      title: msg,
-      timestamp: Date.now(),
-      footer: {
-        text: "코코아 봇",
-        iconURL: defaultImage,
-      },
-    });
-    await interaction.editReply({
-      embeds: [embed],
-    });
+  async pause(interaction: ChatInputCommandInteraction): Promise<boolean> {
+    const player = manager.get(interaction.guild.id);
+    player.pause(!player.paused);
+    return player.paused;
   }
 
-  async pause(interaction: ChatInputCommandInteraction) {
-    const musicPlayer = await this.getPlayer(interaction, interaction.guild.id);
-    if (musicPlayer?.playing) {
-      const pause = await musicPlayer.pause();
-      if (pause) {
-        await this.pauseSuccess(interaction, "pause");
-      } else {
-        await this.Error(interaction, "노래를 일시정지 하지 못했습니다.");
-      }
-    } else {
-      const resume = await musicPlayer.resume();
-      if (resume) {
-        await this.pauseSuccess(interaction, "resume");
-      } else {
-        await this.Error(interaction, "노래를 재생 하지 못했습니다.");
-      }
+  async skip(interaction: ChatInputCommandInteraction): Promise<boolean> {
+    const player = manager.get(interaction.guild.id);
+    try {
+      if (player.queue.current) player.stop();
+      else return false;
+      return true;
+    } catch (error) {
+      winstonLogger.error(error);
+      logger.error("error while skiping track");
+      return false;
     }
   }
 
-  async pauseSuccess(
-    interaction: ChatInputCommandInteraction,
-    type: "pause" | "resume"
-  ) {
-    let title = "";
-    if (type === "pause") {
-      title = "노래를 일시정지 했습니다.";
-    } else if (type === "resume") {
-      title = "노래를 다시 재생합니다.";
-    }
-    const embed = new EmbedBuilder({
-      title: title,
-      timestamp: Date.now(),
-      footer: {
-        text: "코코아 봇",
-        iconURL: defaultImage,
-      },
-    });
-    await interaction.editReply({
-      embeds: [embed],
-    });
-  }
-
-  async skip(interaction: ChatInputCommandInteraction) {
-    const musicPlayer = await this.getPlayer(interaction, interaction.guild.id);
-    const currentSong = musicPlayer.current.title;
-    if (musicPlayer) {
-      const skip = await musicPlayer.skip();
-      if (skip) {
-        await this.skipSuccess(interaction, currentSong);
-      } else {
-        await this.Error(interaction, "노래를 스킵 하지 못했습니다.");
-      }
+  async stop(interaction: ChatInputCommandInteraction): Promise<boolean> {
+    const player = manager.get(interaction.guild.id);
+    try {
+      player.destroy();
+      return true;
+    } catch (error) {
+      winstonLogger.error(error);
+      logger.error("error while stoping player");
+      return false;
     }
   }
 
-  async skipSuccess(interaction: ChatInputCommandInteraction, msg: string) {
-    const embed = new EmbedBuilder({
-      title: "노래를 스킵했습니다.",
-      description: msg,
-      timestamp: Date.now(),
-      footer: {
-        text: "코코아 봇",
-        iconURL: defaultImage,
-      },
+  createSongSelectList(songList: Track[]): SelectMenuComponentOptionData[] {
+    const result: SelectMenuComponentOptionData[] = [];
+    songList.forEach((track) => {
+      result.push({
+        label: track.title,
+        description: track.author,
+        value: track.uri,
+      });
     });
-    await interaction.editReply({
-      embeds: [embed],
-    });
+    return result;
   }
 
-  async search(interaction: ChatInputCommandInteraction) {
-    const song = interaction.options.getString("song");
-    const result = await this.ytManager.search(song);
-    const resultActionList =
-      new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
-        new SelectMenuBuilder()
-          .setCustomId("search")
-          .setPlaceholder("노래를 선택하세요.")
-          .addOptions(this.createResultOptions(result))
-      );
-    const embed = new EmbedBuilder({
-      title: "노래를 선택하세요",
-      description: "30초 안에 선택해야합니다",
-      timestamp: Date.now(),
-      footer: {
-        text: "코코아 봇",
-        iconURL: defaultImage,
-      },
-    });
-    await interaction.editReply({
-      embeds: [embed],
-      components: [resultActionList],
-    });
-    //await this.createActionList(result);
+  createQueueEmbedList(
+    interaction: ChatInputCommandInteraction
+  ): EmbedBuilder[] {
+    const player = manager.get(interaction.guild.id);
+    const queue = player.queue;
+    let embeds = [];
+    let k = 10;
+    for (let i = 0; i < queue.size; i += 10) {
+      const currentPage = queue.slice(i, k);
+      let j = i;
+      k += 10;
+      const info = currentPage
+        .map((track) => {
+          return `${++j}) [${track.title}](${track.thumbnail})`;
+        })
+        .join("\n");
+      const embed = new EmbedBuilder({
+        title: "재생목록",
+        description: `**현재 재생중: [${player.queue.current.title}](${player.queue.current.thumbnail})**\n${info}`,
+      });
+      embeds.push(embed);
+    }
+    return embeds;
   }
 
-  createResultOptions(result: Item[]): SelectMenuComponentOptionData[] {
-    const resultOptions = result.map((element) => {
-      if (element.type === "video") {
-        if (element.title !== undefined || element.title !== null) {
-          return {
-            label: element.title,
-            description: element.description || undefined,
-            value: element.url,
-          };
-        }
-      }
-    });
-    const finalResult = resultOptions.filter(
-      (data) => data !== undefined && data !== null
+  getUserVoiceChannel(
+    interaction: ChatInputCommandInteraction
+  ): VoiceBasedChannel {
+    const guildUser = interaction.guild.members.cache.get(
+      interaction.member.user.id
     );
-    return finalResult;
+    return guildUser.voice.channel;
   }
 
-  async loop(interaction: ChatInputCommandInteraction) {
-    const musicPlayer = await this.getPlayer(interaction, interaction.guild.id);
-    if (musicPlayer) {
-      const loopResult = musicPlayer.loop();
-      if (loopResult) {
-        await this.loopSuccess(
-          interaction,
-          "플레이 리스트 루프가 설정 되었습니다."
-        );
-      } else {
-        await this.loopSuccess(
-          interaction,
-          "플레이 리스트 루프가 설정해제 되었습니다."
-        );
-      }
-    }
-  }
-
-  async loopSuccess(interaction: ChatInputCommandInteraction, msg: string) {
-    const embed = new EmbedBuilder({
-      title: msg,
-      timestamp: Date.now(),
-      footer: {
-        text: "코코아 봇",
-        iconURL: defaultImage,
-      },
-    });
-    await interaction.editReply({
-      embeds: [embed],
+  createEmbed(data: EmbedData): EmbedBuilder {
+    return new EmbedBuilder({
+      title: data.title || null,
+      description: data.description || null,
+      url: data.url || null,
+      timestamp: data.timestamp || Date.now(),
+      color: data.color || null,
+      footer: data.footer || defaultFooter,
+      image: data.image || null,
+      thumbnail: data.thumbnail || defaultThumbnail,
+      provider: data.provider || null,
+      author: data.author || null,
+      fields: data.fields || null,
+      video: data.video || null,
     });
   }
 
-  async Error(interaction: ChatInputCommandInteraction, msg: string) {
-    const embed = new EmbedBuilder({
-      title: "에러",
-      description: msg,
-      color: DiscordColor.Red,
-      timestamp: Date.now(),
-      footer: {
-        text: "코코아 봇",
-        iconURL: defaultImage,
-      },
-    });
-    await interaction.editReply({
-      embeds: [embed],
-    });
+  async sendMessage(
+    interaction: ChatInputCommandInteraction,
+    data: EmbedData
+  ): Promise<void> {
+    const embed = this.createEmbed(data);
+    await interaction.editReply({ embeds: [embed] });
   }
 }

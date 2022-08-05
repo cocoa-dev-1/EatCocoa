@@ -9,10 +9,10 @@ import {
   EmbedBuilder,
   MessageActionRowComponentBuilder,
   ChatInputCommandInteraction,
+  Colors,
 } from "discord.js";
 import Container from "typedi";
 import { GuildVoiceManager } from "../../services/GuildVoiceManager";
-import { QueueManager } from "../../services/QueueManager";
 import { CommandCategory, EcCommand } from "../../types/command";
 
 export const queueCommand: EcCommand = {
@@ -26,14 +26,20 @@ export const queueCommand: EcCommand = {
   async execute(interaction: ChatInputCommandInteraction, guildId: string) {
     await interaction.deferReply();
     const guildVoiceManager = Container.get(GuildVoiceManager);
-    const queueManager = Container.get(QueueManager);
-    const musicPlayer = await guildVoiceManager.getPlayer(interaction, guildId);
-    if (musicPlayer) {
+    const [check, message] = await guildVoiceManager.check(interaction, {
+      isPlayerExist: true,
+    });
+    if (check) {
       let page = 0;
-      const embedList: EmbedBuilder[] = await queueManager.createEmbedList(
-        interaction,
-        musicPlayer
-      );
+      const queueEmbedList: EmbedBuilder[] =
+        guildVoiceManager.createQueueEmbedList(interaction);
+      if (queueEmbedList.length === 0) {
+        await guildVoiceManager.sendMessage(interaction, {
+          title: "남아있는 노래가 없습니다.",
+          color: Colors.Red,
+        });
+        return;
+      }
       const last = new ButtonBuilder()
         .setCustomId("이전")
         .setDisabled(true)
@@ -43,15 +49,15 @@ export const queueCommand: EcCommand = {
         .setCustomId("다음")
         .setLabel("다음")
         .setStyle(ButtonStyle.Success);
-      if (page + 1 === embedList.length) next.setDisabled(true);
+      if (page + 1 === queueEmbedList.length) next.setDisabled(true);
       const row =
         new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
           last,
           next
         );
       await interaction.editReply({
-        content: `**페이지: ${page + 1}/${embedList.length}**`,
-        embeds: [embedList[0]],
+        content: `**페이지: ${page + 1}/${queueEmbedList.length}**`,
+        embeds: [queueEmbedList[0]],
         components: [row],
       });
       const collector =
@@ -60,13 +66,13 @@ export const queueCommand: EcCommand = {
         if (i.isButton()) {
           if (i.customId === "다음") {
             const nextPage = ++page;
-            const currentPage = embedList[nextPage];
-            if (queueManager.checkNext(embedList, nextPage + 1)) {
+            const currentPage = queueEmbedList[nextPage];
+            if (!(page === queueEmbedList.length)) {
               next.setDisabled(false);
             } else {
               next.setDisabled(true);
             }
-            if (queueManager.checkLast(embedList, nextPage + 1)) {
+            if (page <= 1) {
               last.setDisabled(false);
             } else {
               last.setDisabled(true);
@@ -77,19 +83,19 @@ export const queueCommand: EcCommand = {
                 next
               );
             i.update({
-              content: `**페이지: ${nextPage + 1}/${embedList.length}**`,
+              content: `**페이지: ${nextPage + 1}/${queueEmbedList.length}**`,
               embeds: [currentPage],
               components: [row],
             });
           } else if (i.customId === "이전") {
             const lastPage = --page;
-            const currentPage = embedList[lastPage];
-            if (queueManager.checkNext(embedList, lastPage + 1)) {
+            const currentPage = queueEmbedList[lastPage];
+            if (!(page === queueEmbedList.length)) {
               next.setDisabled(false);
             } else {
               next.setDisabled(true);
             }
-            if (queueManager.checkLast(embedList, lastPage + 1)) {
+            if (page <= 1) {
               last.setDisabled(false);
             } else {
               last.setDisabled(true);
@@ -100,7 +106,7 @@ export const queueCommand: EcCommand = {
                 next
               );
             i.update({
-              content: `**페이지: ${lastPage + 1}/${embedList.length}**`,
+              content: `**페이지: ${lastPage + 1}/${queueEmbedList.length}**`,
               embeds: [currentPage],
               components: [row],
             });
@@ -108,7 +114,10 @@ export const queueCommand: EcCommand = {
         }
       });
     } else {
-      guildVoiceManager.Error(interaction, "재생중인 노래가 없습니다.");
+      await guildVoiceManager.sendMessage(interaction, {
+        title: message,
+        color: Colors.Red,
+      });
     }
   },
 };

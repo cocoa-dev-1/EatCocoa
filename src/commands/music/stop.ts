@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
-import { ChatInputCommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction, Colors } from "discord.js";
 import Container from "typedi";
 import { GuildVoiceManager } from "../../services/GuildVoiceManager";
 import { CommandCategory, EcCommand } from "../../types/command";
@@ -15,17 +15,28 @@ export const stopCommand: EcCommand = {
   async execute(interaction: ChatInputCommandInteraction, guildId: string) {
     await interaction.deferReply();
     const guildVoiceManager = Container.get(GuildVoiceManager);
-    const canStop = guildVoiceManager.check(interaction, guildId);
-    if (canStop) {
-      const musicPlayer = await guildVoiceManager.getPlayer(
-        interaction,
-        guildId
-      );
-      if (musicPlayer) {
-        await guildVoiceManager.stop(interaction, musicPlayer);
+    const [check, message] = await guildVoiceManager.check(interaction, {
+      inVoiceChannel: true,
+      inSameChannel: true,
+      isPlayerExist: true,
+    });
+    if (check) {
+      const result = await guildVoiceManager.stop(interaction);
+      if (result) {
+        await guildVoiceManager.sendMessage(interaction, {
+          title: "노래 재생을 종료하였습니다.",
+        });
       } else {
-        await guildVoiceManager.Error(interaction, "재생중인 노래가 없습니다.");
+        await guildVoiceManager.sendMessage(interaction, {
+          title: "노래 재생을 종료하던중 에러가 발생하였습니다.",
+          color: Colors.Red,
+        });
       }
+    } else {
+      await guildVoiceManager.sendMessage(interaction, {
+        title: message,
+        color: Colors.Red,
+      });
     }
   },
 };

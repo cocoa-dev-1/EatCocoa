@@ -1,13 +1,11 @@
 import { RESTPostAPIApplicationCommandsJSONBody } from "discord-api-types/v10";
-import { Collection, CommandInteraction } from "discord.js";
-import { EatCocoa } from "../structures/Client";
 
 export interface EcCommand {
   name: string;
   description: string;
   category: string;
   data: RESTPostAPIApplicationCommandsJSONBody;
-  execute(interaction: CommandInteraction, guildId: string | null): void;
+  execute(interaction: any, guildId: string | null): void;
 }
 
 export interface EcCommandCategory {

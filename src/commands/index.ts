@@ -10,7 +10,6 @@ import { CommandCategory, EcCommand } from "../types/command";
 import { adminCommands } from "./admin";
 import { mainCommands } from "./main";
 import { musicCommands } from "./music";
-import { playlistCommands } from "./playlist";
 
 export const helpCommand: EcCommand = {
   name: "도움말",
@@ -29,7 +28,6 @@ export const allCommands: EcCommand[] = [
   ...adminCommands,
   ...musicCommands,
   ...mainCommands,
-  ...playlistCommands,
   helpCommand,
 ];
 

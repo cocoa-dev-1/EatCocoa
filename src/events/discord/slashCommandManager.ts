@@ -1,8 +1,8 @@
 import { Interaction } from "discord.js";
-import { commandCollection } from "../commands";
-import { EcEvent } from "../types/event";
-import { logger } from "../utils/logger";
-import { winstonLogger } from "../utils/winston";
+import { commandCollection } from "../../commands";
+import { EcEvent } from "../../types/event";
+import { logger } from "../../utils/logger";
+import { winstonLogger } from "../../utils/winston";
 
 export const slashCommandManager: EcEvent = {
   name: "interactionCreate",
