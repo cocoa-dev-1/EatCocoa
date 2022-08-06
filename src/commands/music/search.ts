@@ -35,9 +35,7 @@ export const searchCommand: EcCommand = {
     )
     .toJSON(),
   async execute(interaction: ChatInputCommandInteraction, guildId: string) {
-    await interaction.deferReply({
-      ephemeral: true,
-    });
+    await interaction.deferReply();
     const guildVoiceManager = Container.get(GuildVoiceManager);
     const [check, message] = await guildVoiceManager.check(interaction, {
       inVoiceChannel: true,

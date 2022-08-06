@@ -103,6 +103,15 @@ export class GuildVoiceManager {
     }
   }
 
+  async setVolume(
+    interaction: ChatInputCommandInteraction
+  ): Promise<number | null> {
+    const volume = interaction.options.getInteger("음량");
+    const player = manager.get(interaction.guild.id);
+    player.setVolume(volume);
+    return player.volume;
+  }
+
   createSongSelectList(songList: Track[]): SelectMenuComponentOptionData[] {
     const result: SelectMenuComponentOptionData[] = [];
     songList.forEach((track) => {

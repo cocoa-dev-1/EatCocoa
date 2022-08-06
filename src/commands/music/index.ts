@@ -6,6 +6,7 @@ import { queueCommand } from "./queue";
 import { searchCommand } from "./search";
 import { skipCommand } from "./skip";
 import { stopCommand } from "./stop";
+import { volumeCommand } from "./volume";
 
 export const musicCommands: EcCommand[] = [
   playCommand,
@@ -15,4 +16,5 @@ export const musicCommands: EcCommand[] = [
   searchCommand,
   loopCommand,
   stopCommand,
+  volumeCommand,
 ];
