@@ -1,11 +1,11 @@
 import { DataSource, Db } from "typeorm";
 import { db, DEV } from "../../config.json";
-import { PlayList } from "../entities/PlayList";
-import { Song } from "../entities/Song";
 import { logger } from "../utils/logger";
 import { winstonLogger } from "../utils/winston";
 import path from "path";
-import { SongDetail } from "../entities/SongDetail";
+import { Playlist } from "../entities/Playlist";
+import { Track } from "../entities/Track";
+import { User } from "discord.js";
 
 export const ECDataSource = new DataSource({
   type: "mariadb",
@@ -14,7 +14,7 @@ export const ECDataSource = new DataSource({
   username: db.username,
   password: db.password,
   database: db.database,
-  entities: [PlayList, Song, SongDetail],
+  entities: [Playlist, Track, User],
   migrations: [path.resolve(__dirname, "src/migration") + "/*.ts"],
   migrationsTableName: "migration",
   synchronize: DEV ? true : false,

@@ -12,6 +12,7 @@ import { Service } from "typedi";
 import { manager } from "../loader/managerLoader";
 import { PlayerCheckOption } from "../types/player";
 import { defaultFooter, defaultThumbnail } from "../utils/asset";
+import { createEmbed } from "../utils/embed";
 import { logger } from "../utils/logger";
 import { winstonLogger } from "../utils/winston";
 
@@ -158,28 +159,11 @@ export class GuildVoiceManager {
     return guildUser.voice.channel;
   }
 
-  createEmbed(data: EmbedData): EmbedBuilder {
-    return new EmbedBuilder({
-      title: data.title || null,
-      description: data.description || null,
-      url: data.url || null,
-      timestamp: data.timestamp || Date.now(),
-      color: data.color || null,
-      footer: data.footer || defaultFooter,
-      image: data.image || null,
-      thumbnail: data.thumbnail || defaultThumbnail,
-      provider: data.provider || null,
-      author: data.author || null,
-      fields: data.fields || null,
-      video: data.video || null,
-    });
-  }
-
   async sendMessage(
     interaction: ChatInputCommandInteraction,
     data: EmbedData
   ): Promise<void> {
-    const embed = this.createEmbed(data);
+    const embed = createEmbed(data);
     await interaction.editReply({ embeds: [embed] });
   }
 }

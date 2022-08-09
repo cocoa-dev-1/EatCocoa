@@ -1,15 +1,15 @@
-import { User } from "discord.js";
 import {
   Column,
   Entity,
-  OneToMany,
+  ManyToMany,
+  ManyToOne,
   PrimaryGeneratedColumn,
-  Unique,
 } from "typeorm";
-import { Song } from "./Song";
+import { Track } from "./Track";
+import { User } from "./User";
 
 @Entity()
-export class PlayList {
+export class Playlist {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -17,8 +17,11 @@ export class PlayList {
   name: string;
 
   @Column()
-  creator: string;
+  order: number[];
 
-  @OneToMany(() => Song, (song) => song.id)
-  songs: Song[];
+  @ManyToOne(() => User, (user) => user.id)
+  user: User;
+
+  @ManyToMany(() => Track, (track) => track.id)
+  tracks: Track[];
 }
