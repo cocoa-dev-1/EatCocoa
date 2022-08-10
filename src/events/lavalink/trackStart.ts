@@ -15,7 +15,7 @@ export const trackStart: EcLavaLink = {
   once: false,
   async execute(player: Player, track: Track) {
     const channel = client.channels.cache.get(player.textChannel);
-    if (channel.type === ChannelType.GuildText) {
+    if (channel.isTextBased()) {
       const embed = new EmbedBuilder({
         title: "노래를 재생합니다.",
         description: `[${track.title}](${track.uri})`,

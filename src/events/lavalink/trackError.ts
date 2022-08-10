@@ -12,7 +12,7 @@ export const trackError: EcLavaLink = {
   async execute(player: Player, track: Track, payload: TrackExceptionEvent) {
     winstonLogger.error(payload.error);
     const channel = client.channels.cache.get(player.textChannel);
-    if (channel.type === ChannelType.GuildText) {
+    if (channel.isTextBased()) {
       const embed = new EmbedBuilder({
         title: "노래를 가져오던중 에러가 발생하였습니다.",
         color: Colors.Red,

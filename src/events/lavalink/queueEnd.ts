@@ -9,7 +9,7 @@ export const queueEnd: EcLavaLink = {
   once: false,
   async execute(player: Player) {
     const channel = client.channels.cache.get(player.textChannel);
-    if (channel.type === ChannelType.GuildText) {
+    if (channel.isTextBased()) {
       const embed = new EmbedBuilder({
         title: "노래를 모두 재생하였습니다.",
         thumbnail: defaultThumbnail,
