@@ -77,11 +77,8 @@ export const playCommand: EcCommand = {
         } else {
           player.queue.add(result.tracks);
         }
-
-        if (!isExist) {
-          if (!player.playing && !player.paused && !player.queue.size) {
-            player.play();
-          }
+        if (!player.playing && !player.paused) {
+          player.play();
         }
         let title = "노래가 추가되었습니다.";
         let description = `[${result.tracks[0].title}](${result.tracks[0].uri})`;
