@@ -15,14 +15,12 @@ export const ECDataSource = new DataSource({
   password: db.password,
   database: db.database,
   entities: [Playlist, Track, User],
-  migrations: [path.resolve(__dirname, "src/migration") + "/*.ts"],
-  migrationsTableName: "migration",
   synchronize: DEV ? true : false,
   logging: ["warn", "error"],
 });
 
 export const loadTypeorm = async () => {
-  ECDataSource.initialize()
+  await ECDataSource.initialize()
     .then(() => {
       logger.success("Data Source has been initialized!");
     })
