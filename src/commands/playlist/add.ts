@@ -15,6 +15,7 @@ import { CommandCategory, EcCommand, EcPlCommand } from "../../types/command";
 import { GuildVoiceManager } from "../../services/GuildVoiceManager";
 import { PlaylistManager } from "../../services/PlaylistManager";
 import { winstonLogger } from "../../utils/winston";
+import { defaultFooter } from "../../utils/asset";
 
 export const pladdCommand: EcPlCommand = {
   name: "추가",
@@ -108,6 +109,10 @@ export const pladdCommand: EcPlCommand = {
             description: description,
             thumbnail: {
               url: thumbnail,
+            },
+            footer: {
+              text: `플레이 리스트: ${playlist.name}`,
+              iconURL: defaultFooter.iconURL,
             },
           });
         } else {
