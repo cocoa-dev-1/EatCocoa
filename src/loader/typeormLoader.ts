@@ -5,7 +5,7 @@ import { winstonLogger } from "../utils/winston";
 import path from "path";
 import { Playlist } from "../entities/Playlist";
 import { Track } from "../entities/Track";
-import { User } from "discord.js";
+import { User } from "../entities/User";
 
 export const ECDataSource = new DataSource({
   type: "mariadb",
@@ -14,7 +14,7 @@ export const ECDataSource = new DataSource({
   username: db.username,
   password: db.password,
   database: db.database,
-  entities: [Playlist, Track, User],
+  entities: [User, Playlist, Track],
   synchronize: DEV ? true : false,
   logging: ["warn", "error"],
 });

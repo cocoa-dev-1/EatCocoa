@@ -1,6 +1,7 @@
 import {
   Column,
   Entity,
+  JoinTable,
   ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
@@ -16,12 +17,13 @@ export class Playlist {
   @Column({ unique: true })
   name: string;
 
-  @Column()
+  @Column("simple-array", { default: () => "('')" })
   order: number[];
 
   @ManyToOne(() => User, (user) => user.id)
   user: User;
 
-  @ManyToMany(() => Track, (track) => track.id)
+  @ManyToMany(() => Track, (track) => track.playlist)
+  @JoinTable()
   tracks: Track[];
 }

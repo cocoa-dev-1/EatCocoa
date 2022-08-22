@@ -18,6 +18,7 @@ import Container from "typedi";
 import { manager } from "../../loader/managerLoader";
 import { GuildVoiceManager } from "../../services/GuildVoiceManager";
 import { CommandCategory, EcCommand } from "../../types/command";
+import { createEmbed } from "../../utils/embed";
 import { playCommand } from "./play";
 
 export const searchCommand: EcCommand = {
@@ -72,7 +73,7 @@ export const searchCommand: EcCommand = {
           .setPlaceholder("노래를 선택하세요")
           .addOptions(songSelectList)
       );
-      const songEmbed = guildVoiceManager.createEmbed({
+      const songEmbed = createEmbed({
         title: "노래를 선택하세요",
         description: "30초 안에 선택해야합니다",
       });
@@ -109,7 +110,7 @@ export const searchCommand: EcCommand = {
             player.connect();
           }
           player.queue.add(result.tracks[0]);
-          const embed = guildVoiceManager.createEmbed({
+          const embed = createEmbed({
             title: "노래가 추가되었습니다.",
             description: `[${result.tracks[0].title}](${result.tracks[0].uri})`,
             thumbnail: {

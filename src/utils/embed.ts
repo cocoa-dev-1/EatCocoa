@@ -10,7 +10,7 @@ export const createEmbed = (data: EmbedData): EmbedBuilder => {
     color: data.color || null,
     footer: data.footer || defaultFooter,
     image: data.image || null,
-    thumbnail: data.thumbnail || defaultThumbnail,
+    thumbnail: data.thumbnail || null,
     provider: data.provider || null,
     author: data.author || null,
     fields: data.fields || null,

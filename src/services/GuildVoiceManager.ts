@@ -3,7 +3,9 @@ import {
   Embed,
   EmbedBuilder,
   EmbedData,
+  ModalSubmitInteraction,
   SelectMenuComponentOptionData,
+  SelectMenuInteraction,
   VoiceBasedChannel,
 } from "discord.js";
 import { LoadType, SearchResult, Track } from "erela.js";
@@ -52,7 +54,7 @@ export class GuildVoiceManager {
   }
 
   async search(
-    interaction: ChatInputCommandInteraction,
+    interaction: ChatInputCommandInteraction | SelectMenuInteraction,
     song: string
   ): Promise<[SearchResult, LoadType]> {
     const result = await manager.search(song, interaction.member);
