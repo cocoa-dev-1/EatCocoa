@@ -67,15 +67,15 @@ export const queueCommand: EcCommand = {
           if (i.customId === "다음") {
             const nextPage = ++page;
             const currentPage = queueEmbedList[nextPage];
-            if (!(page === queueEmbedList.length)) {
+            if (!(page + 1 === queueEmbedList.length)) {
               next.setDisabled(false);
             } else {
               next.setDisabled(true);
             }
             if (page <= 1) {
-              last.setDisabled(false);
-            } else {
               last.setDisabled(true);
+            } else {
+              last.setDisabled(false);
             }
             const row =
               new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(
@@ -90,15 +90,15 @@ export const queueCommand: EcCommand = {
           } else if (i.customId === "이전") {
             const lastPage = --page;
             const currentPage = queueEmbedList[lastPage];
-            if (!(page === queueEmbedList.length)) {
+            if (!(page + 1 === queueEmbedList.length)) {
               next.setDisabled(false);
             } else {
               next.setDisabled(true);
             }
-            if (page <= 1) {
-              last.setDisabled(false);
-            } else {
+            if (page < 1) {
               last.setDisabled(true);
+            } else {
+              last.setDisabled(false);
             }
             const row =
               new ActionRowBuilder<MessageActionRowComponentBuilder>().addComponents(

@@ -34,4 +34,13 @@ export class TrackManager {
       return result;
     }
   }
+
+  async getTrackById(id: number): Promise<Track> {
+    const result = await this.trackRepository.findOne({
+      where: {
+        id: id,
+      },
+    });
+    return result;
+  }
 }

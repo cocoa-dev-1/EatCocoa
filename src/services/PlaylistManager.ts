@@ -69,11 +69,11 @@ export class PlaylistManager {
     let playlist = await this.get(plName);
     if (playlist) {
       if (song.playlist) {
-        song.tracks.forEach(async (track) => {
+        for (let track of song.tracks) {
           const result = await this.trackManager.create(track);
           playlist.tracks.push(result);
           playlist.order.push(result.id);
-        });
+        }
       } else {
         const result = await this.trackManager.create(song.tracks[0]);
         playlist.tracks.push(result);
@@ -97,6 +97,38 @@ export class PlaylistManager {
       }
     );
     return result;
+  }
+
+  async createPlaylistEmbedList(plName: string): Promise<EmbedBuilder[]> {
+    const playlist = await this.get(plName);
+    const queue = await this.getPlaylistTracks(playlist);
+    let embeds = [];
+    let k = 10;
+    for (let i = 0; i < queue.length; i += 10) {
+      const currentPage = queue.slice(i, k);
+      let j = i;
+      k += 10;
+      const info = currentPage
+        .map((track) => {
+          return `${++j}) [${track.name}](${track.url})`;
+        })
+        .join("\n");
+      const embed = new EmbedBuilder({
+        title: "플레이 리스트 목록",
+        description: `${info}`,
+      });
+      embeds.push(embed);
+    }
+    return embeds;
+  }
+
+  async getPlaylistTracks(playlist: Playlist): Promise<Track[]> {
+    const tracks = [];
+    for (let id of playlist.order) {
+      const track = await this.trackManager.getTrackById(id);
+      tracks.push(track);
+    }
+    return tracks;
   }
 
   async sendMessage(
