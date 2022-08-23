@@ -14,7 +14,7 @@ import { Playlist } from "../entities/Playlist";
 import { Track } from "../entities/Track";
 import { ECDataSource } from "../loader/typeormLoader";
 import { EcPlCommand } from "../types/command";
-import { defaultFooter, defaultThumbnail } from "../utils/asset";
+import { defaultFooter, defaultImage, defaultThumbnail } from "../utils/asset";
 import { createEmbed } from "../utils/embed";
 import { TrackManager } from "./TrackManager";
 import { UserManager } from "./UserManager";
@@ -116,6 +116,10 @@ export class PlaylistManager {
       const embed = new EmbedBuilder({
         title: "플레이 리스트 목록",
         description: `${info}`,
+        footer: {
+          text: `플레이 리스트: ${playlist.name}`,
+          icon_url: defaultImage,
+        },
       });
       embeds.push(embed);
     }
