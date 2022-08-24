@@ -22,7 +22,9 @@ import { winstonLogger } from "../utils/winston";
 export class GuildVoiceManager {
   constructor() {}
 
-  isExist(interaction: ChatInputCommandInteraction): boolean {
+  isExist(
+    interaction: ChatInputCommandInteraction | ModalSubmitInteraction
+  ): boolean {
     const player = manager.get(interaction.guild.id);
     if (player) {
       return true;
@@ -32,7 +34,7 @@ export class GuildVoiceManager {
   }
 
   async check(
-    interaction: ChatInputCommandInteraction,
+    interaction: ChatInputCommandInteraction | ModalSubmitInteraction,
     option: PlayerCheckOption
   ): Promise<[boolean, string]> {
     const userVoiceChannel = this.getUserVoiceChannel(interaction);
@@ -54,7 +56,10 @@ export class GuildVoiceManager {
   }
 
   async search(
-    interaction: ChatInputCommandInteraction | SelectMenuInteraction,
+    interaction:
+      | ChatInputCommandInteraction
+      | SelectMenuInteraction
+      | ModalSubmitInteraction,
     song: string
   ): Promise<[SearchResult, LoadType]> {
     const result = await manager.search(song, interaction.member);
@@ -153,7 +158,7 @@ export class GuildVoiceManager {
   }
 
   getUserVoiceChannel(
-    interaction: ChatInputCommandInteraction
+    interaction: ChatInputCommandInteraction | ModalSubmitInteraction
   ): VoiceBasedChannel {
     const guildUser = interaction.guild.members.cache.get(
       interaction.member.user.id

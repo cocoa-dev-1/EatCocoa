@@ -4,6 +4,8 @@ import { Repository } from "typeorm";
 import { Track } from "../entities/Track";
 import { Track as LaTrack } from "erela.js";
 import { ECDataSource } from "../loader/typeormLoader";
+import { APIInteractionGuildMember, GuildMember } from "discord.js";
+import { manager } from "../loader/managerLoader";
 
 @Service()
 export class TrackManager {
@@ -42,5 +44,20 @@ export class TrackManager {
       },
     });
     return result;
+  }
+
+  async toLaTrack(
+    track: Track,
+    requester: GuildMember | APIInteractionGuildMember
+  ): Promise<LaTrack | null> {
+    const result = await manager.search(track.url, requester);
+    if (
+      result.loadType == "SEARCH_RESULT" ||
+      result.loadType === "TRACK_LOADED"
+    ) {
+      return result.tracks[0];
+    } else {
+      return null;
+    }
   }
 }
