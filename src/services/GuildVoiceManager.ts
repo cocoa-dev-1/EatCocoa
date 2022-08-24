@@ -3,7 +3,9 @@ import {
   Embed,
   EmbedBuilder,
   EmbedData,
+  ModalSubmitInteraction,
   SelectMenuComponentOptionData,
+  SelectMenuInteraction,
   VoiceBasedChannel,
 } from "discord.js";
 import { LoadType, SearchResult, Track } from "erela.js";
@@ -12,6 +14,7 @@ import { Service } from "typedi";
 import { manager } from "../loader/managerLoader";
 import { PlayerCheckOption } from "../types/player";
 import { defaultFooter, defaultThumbnail } from "../utils/asset";
+import { createEmbed } from "../utils/embed";
 import { logger } from "../utils/logger";
 import { winstonLogger } from "../utils/winston";
 
@@ -19,7 +22,9 @@ import { winstonLogger } from "../utils/winston";
 export class GuildVoiceManager {
   constructor() {}
 
-  isExist(interaction: ChatInputCommandInteraction): boolean {
+  isExist(
+    interaction: ChatInputCommandInteraction | ModalSubmitInteraction
+  ): boolean {
     const player = manager.get(interaction.guild.id);
     if (player) {
       return true;
@@ -29,7 +34,7 @@ export class GuildVoiceManager {
   }
 
   async check(
-    interaction: ChatInputCommandInteraction,
+    interaction: ChatInputCommandInteraction | ModalSubmitInteraction,
     option: PlayerCheckOption
   ): Promise<[boolean, string]> {
     const userVoiceChannel = this.getUserVoiceChannel(interaction);
@@ -51,7 +56,10 @@ export class GuildVoiceManager {
   }
 
   async search(
-    interaction: ChatInputCommandInteraction,
+    interaction:
+      | ChatInputCommandInteraction
+      | SelectMenuInteraction
+      | ModalSubmitInteraction,
     song: string
   ): Promise<[SearchResult, LoadType]> {
     const result = await manager.search(song, interaction.member);
@@ -150,7 +158,7 @@ export class GuildVoiceManager {
   }
 
   getUserVoiceChannel(
-    interaction: ChatInputCommandInteraction
+    interaction: ChatInputCommandInteraction | ModalSubmitInteraction
   ): VoiceBasedChannel {
     const guildUser = interaction.guild.members.cache.get(
       interaction.member.user.id
@@ -158,28 +166,11 @@ export class GuildVoiceManager {
     return guildUser.voice.channel;
   }
 
-  createEmbed(data: EmbedData): EmbedBuilder {
-    return new EmbedBuilder({
-      title: data.title || null,
-      description: data.description || null,
-      url: data.url || null,
-      timestamp: data.timestamp || Date.now(),
-      color: data.color || null,
-      footer: data.footer || defaultFooter,
-      image: data.image || null,
-      thumbnail: data.thumbnail || defaultThumbnail,
-      provider: data.provider || null,
-      author: data.author || null,
-      fields: data.fields || null,
-      video: data.video || null,
-    });
-  }
-
   async sendMessage(
     interaction: ChatInputCommandInteraction,
     data: EmbedData
   ): Promise<void> {
-    const embed = this.createEmbed(data);
+    const embed = createEmbed(data);
     await interaction.editReply({ embeds: [embed] });
   }
 }

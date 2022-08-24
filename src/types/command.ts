@@ -1,4 +1,5 @@
 import { RESTPostAPIApplicationCommandsJSONBody } from "discord-api-types/v10";
+import { SelectMenuInteraction } from "discord.js";
 
 export interface EcCommand {
   name: string;
@@ -6,6 +7,12 @@ export interface EcCommand {
   category: string;
   data: RESTPostAPIApplicationCommandsJSONBody;
   execute(interaction: any, guildId: string | null): void;
+}
+
+export interface EcPlCommand {
+  name: string;
+  description: string;
+  execute(interaction: SelectMenuInteraction);
 }
 
 export interface EcCommandCategory {
