@@ -67,12 +67,12 @@ export const queueCommand: EcCommand = {
           if (i.customId === "다음") {
             const nextPage = ++page;
             const currentPage = queueEmbedList[nextPage];
-            if (!(page + 1 === queueEmbedList.length)) {
-              next.setDisabled(false);
-            } else {
+            if (nextPage + 1 >= queueEmbedList.length) {
               next.setDisabled(true);
+            } else {
+              next.setDisabled(false);
             }
-            if (page <= 1) {
+            if (nextPage <= 0) {
               last.setDisabled(true);
             } else {
               last.setDisabled(false);
@@ -90,12 +90,12 @@ export const queueCommand: EcCommand = {
           } else if (i.customId === "이전") {
             const lastPage = --page;
             const currentPage = queueEmbedList[lastPage];
-            if (!(page + 1 === queueEmbedList.length)) {
-              next.setDisabled(false);
-            } else {
+            if (lastPage + 1 >= queueEmbedList.length) {
               next.setDisabled(true);
+            } else {
+              next.setDisabled(false);
             }
-            if (page < 1) {
+            if (lastPage <= 0) {
               last.setDisabled(true);
             } else {
               last.setDisabled(false);
