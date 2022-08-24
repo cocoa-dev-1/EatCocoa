@@ -8,7 +8,7 @@ import {
   TextInputBuilder,
   TextInputStyle,
 } from "discord.js";
-import { Player } from "erela.js";
+import { Player, Track } from "erela.js";
 import Container from "typedi";
 import { manager } from "../../loader/managerLoader";
 import { GuildVoiceManager } from "../../services/GuildVoiceManager";
@@ -62,7 +62,7 @@ export const plplayCommand: EcPlCommand = {
         if (check) {
           const playlist = await playlistManager.get(playlistName);
           const plTracks = await playlistManager.getPlaylistTracks(playlist);
-          const laTracks = [];
+          const laTracks: Track[] = [];
           for (let track of plTracks) {
             const laTrack = await trackManager.toLaTrack(
               track,
@@ -92,6 +92,18 @@ export const plplayCommand: EcPlCommand = {
           if (!player.playing && !player.paused) {
             player.play();
           }
+
+          await playlistManager.modalMessage(submitted, {
+            title: "플레이 리스트가 추가되었습니다.",
+            description: playlist.name,
+            thumbnail: {
+              url: laTracks[0].thumbnail,
+            },
+            footer: {
+              text: submitted.user.tag,
+              iconURL: submitted.user.avatarURL(),
+            },
+          });
         } else {
           await playlistManager.modalMessage(submitted, {
             title: message,
