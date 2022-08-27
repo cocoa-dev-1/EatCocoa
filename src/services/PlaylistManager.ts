@@ -156,6 +156,10 @@ export class PlaylistManager {
     data: EmbedData
   ): Promise<void> {
     const embed = createEmbed(data);
-    await interaction.reply({ embeds: [embed] });
+    if (interaction.deferred) {
+      await interaction.editReply({ embeds: [embed] });
+    } else {
+      await interaction.reply({ embeds: [embed] });
+    }
   }
 }

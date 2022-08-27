@@ -53,6 +53,7 @@ export const plplayCommand: EcPlCommand = {
       });
 
     if (submitted) {
+      await submitted.deferReply();
       const playlistName = submitted.fields.getTextInputValue("plName");
       if ((await playlistManager.isExist(playlistName))) {
         const [check, message] = await guildVoiceManager.check(submitted, {
