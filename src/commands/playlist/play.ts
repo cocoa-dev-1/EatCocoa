@@ -54,7 +54,7 @@ export const plplayCommand: EcPlCommand = {
 
     if (submitted) {
       const playlistName = submitted.fields.getTextInputValue("plName");
-      if (playlistManager.isExist(playlistName)) {
+      if ((await playlistManager.isExist(playlistName))) {
         const [check, message] = await guildVoiceManager.check(submitted, {
           inSameChannel: true,
           inVoiceChannel: true,
@@ -110,6 +110,11 @@ export const plplayCommand: EcPlCommand = {
             color: Colors.Red,
           });
         }
+      } else {
+        await playlistManager.modalMessage(submitted, {
+          title: "존재하지 않는 플레이 리스트 입니다.",
+          color: Colors.Red,
+        });
       }
     }
   },

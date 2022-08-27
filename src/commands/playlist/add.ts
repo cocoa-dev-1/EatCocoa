@@ -68,7 +68,7 @@ export const pladdCommand: EcPlCommand = {
       });
     if (submitted) {
       const playlistName = submitted.fields.getTextInputValue("plName");
-      if (playlistManager.isExist(playlistName)) {
+      if ((await playlistManager.isExist(playlistName))) {
         const url = submitted.fields.getTextInputValue("plUrl");
         const [result, type] = await guildVoiceManager.search(interaction, url);
         let isPlayList = false;

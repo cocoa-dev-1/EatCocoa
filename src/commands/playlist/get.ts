@@ -53,7 +53,7 @@ export const plgetCommand: EcPlCommand = {
 
     if (submitted) {
       const playlistName = submitted.fields.getTextInputValue("plName");
-      if (playlistManager.isExist(playlistName)) {
+      if ((await playlistManager.isExist(playlistName))) {
         const embeds = await playlistManager.createPlaylistEmbedList(
           playlistName
         );
