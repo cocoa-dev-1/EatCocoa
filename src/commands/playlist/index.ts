@@ -1,20 +1,29 @@
 import { EcCommand, EcPlCommand } from "../../types/command";
-import { pladdCommand } from "./add";
 import { plcreateCommand } from "./create";
-import { plgetCommand } from "./get";
-import { plmainCommand } from "./main";
-import { plplayCommand } from "./play";
+import { pldeleteCommand } from "./delete";
+import { plplaylistCommand } from "./playlist";
+// import { pladdCommand } from "./old/add";
+// import { plcreateCommand } from "./old/create";
+// import { plgetCommand } from "./old/get";
+// import { plmainCommand } from "./old/main";
+// import { plplayCommand } from "./old/play";
 
-export const playlistCommands: EcCommand[] = [plmainCommand];
+// export const playlistCommands: EcCommand[] = [plmainCommand];
 
-export const playlistSubCommands: EcPlCommand[] = [
+// export const playlistSubCommands: EcPlCommand[] = [
+//   plcreateCommand,
+//   pladdCommand,
+//   plgetCommand,
+//   plplayCommand,
+// ];
+
+// export const playlistSubCommandCollections = new Map<string, EcPlCommand>();
+// playlistSubCommands.forEach((plCommand) =>
+//   playlistSubCommandCollections.set(plCommand.name, plCommand)
+// );
+
+export const playlistCommands: EcCommand[] = [
   plcreateCommand,
-  pladdCommand,
-  plgetCommand,
-  plplayCommand,
+  pldeleteCommand,
+  plplaylistCommand,
 ];
-
-export const playlistSubCommandCollections = new Map<string, EcPlCommand>();
-playlistSubCommands.forEach((plCommand) =>
-  playlistSubCommandCollections.set(plCommand.name, plCommand)
-);
