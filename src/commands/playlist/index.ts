@@ -1,6 +1,7 @@
 import { EcCommand, EcPlCommand } from "../../types/command";
 import { plcreateCommand } from "./create";
 import { pldeleteCommand } from "./delete";
+import { plplayCommand } from "./play";
 import { plplaylistCommand } from "./playlist";
 // import { pladdCommand } from "./old/add";
 // import { plcreateCommand } from "./old/create";
@@ -23,6 +24,7 @@ import { plplaylistCommand } from "./playlist";
 // );
 
 export const playlistCommands: EcCommand[] = [
+  plplayCommand,
   plcreateCommand,
   pldeleteCommand,
   plplaylistCommand,
