@@ -18,7 +18,7 @@ export const loopCommand: EcCommand = {
     )
     .addSubcommand((subcommand) =>
       subcommand
-        .setName("재생목록")
+        .setName("목록")
         .setDescription("현재 재생목록을 반복재생/해제합니다.")
     )
     .toJSON(),

@@ -12,11 +12,11 @@ import { TrackManager } from "../../services/TrackManager";
 import { CommandCategory, EcCommand } from "../../types/command";
 
 export const plplayCommand: EcCommand = {
-  name: "플레이리스트재생",
+  name: "로드",
   description: "플레이 리스트를 재생합니다.",
   category: CommandCategory.get("PLAYLIST").value,
   data: new SlashCommandBuilder()
-    .setName("플레이리스트재생")
+    .setName("로드")
     .setDescription("플레이 리스트를 재생합니다.")
     .addStringOption((option) =>
       option
