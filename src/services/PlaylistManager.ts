@@ -116,6 +116,13 @@ export class PlaylistManager {
     }
   }
 
+  async remove(playlist: Playlist, plIndex: number): Promise<Track> {
+    const track = await this.trackManager.getTrackById(playlist.order[plIndex]);
+    playlist.order.splice(plIndex, 1);
+    await this.playlistRepository.save(playlist);
+    return track;
+  }
+
   // async createCommandList(): Promise<SelectMenuComponentOptionData[]> {
   //   const result: SelectMenuComponentOptionData[] = playlistSubCommands.map(
   //     (command) => {
