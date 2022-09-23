@@ -44,7 +44,6 @@ export const plremoveCommand: EcCommand = {
 
     if (isExist) {
       const playlist = await playlistManager.get(plName);
-      console.log(playlist.order);
       if (playlist.user.discordId === interaction.user.id) {
         if (plIndex <= playlist.order.length) {
           const result = await playlistManager.remove(playlist, plIndex - 1);
