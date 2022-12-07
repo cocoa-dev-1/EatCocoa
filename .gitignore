@@ -8,3 +8,5 @@ config.json
 Player/
 
 old/
+
+.idea/
