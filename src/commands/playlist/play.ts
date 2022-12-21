@@ -1,12 +1,7 @@
 import {
-  ActionRowBuilder,
+  ChatInputCommandInteraction,
   Colors,
-  ModalActionRowComponentBuilder,
-  ModalBuilder,
-  ModalSubmitInteraction,
-  SelectMenuInteraction,
-  TextInputBuilder,
-  TextInputStyle,
+  SlashCommandBuilder,
 } from "discord.js";
 import { Player, Track } from "erela.js";
 import Container from "typedi";
@@ -14,109 +9,101 @@ import { manager } from "../../loader/managerLoader";
 import { GuildVoiceManager } from "../../services/GuildVoiceManager";
 import { PlaylistManager } from "../../services/PlaylistManager";
 import { TrackManager } from "../../services/TrackManager";
-import { EcPlCommand } from "../../types/command";
-import { winstonLogger } from "../../utils/winston";
+import { CommandCategory, EcCommand } from "../../types/command";
 
-export const plplayCommand: EcPlCommand = {
-  name: "재생",
+export const plplayCommand: EcCommand = {
+  name: "로드",
   description: "플레이 리스트를 재생합니다.",
-  async execute(interaction: SelectMenuInteraction) {
+  category: CommandCategory.get("PLAYLIST").value,
+  data: new SlashCommandBuilder()
+    .setName("로드")
+    .setDescription("플레이 리스트를 재생합니다.")
+    .addStringOption((option) =>
+      option
+        .setName("playlist")
+        .setDescription("플레이 리스트")
+        .setRequired(true)
+        .setAutocomplete(true)
+    )
+    .toJSON(),
+  async execute(interaction: ChatInputCommandInteraction) {
+    await interaction.deferReply();
+
     const playlistManager = Container.get(PlaylistManager);
     const guildVoiceManager = Container.get(GuildVoiceManager);
     const trackManager = Container.get(TrackManager);
-    const modal = new ModalBuilder()
-      .setTitle("플레이 리스트를 재생합니다.")
-      .setCustomId("plPlay");
-    const playlistNameInput = new TextInputBuilder()
-      .setCustomId("plName")
-      .setLabel("플레이 리스트 이름을 입력하세요.")
-      .setStyle(TextInputStyle.Short);
-
-    const firstActionRow =
-      new ActionRowBuilder<ModalActionRowComponentBuilder>().addComponents(
-        playlistNameInput
-      );
-
-    modal.addComponents(firstActionRow);
-    await interaction.showModal(modal);
-
-    const submitted: ModalSubmitInteraction = await interaction
-      .awaitModalSubmit({
-        time: 60000,
-        filter: (i) => i.user.id === interaction.user.id,
-      })
-      .catch((error) => {
-        // Catch any Errors that are thrown (e.g. if the awaitModalSubmit times out after 60000 ms)
-        console.error(error);
-        winstonLogger.error(error);
-        return null;
+    const plName = interaction.options.getString("playlist");
+    const isExist = await playlistManager.isExist(plName);
+    if (isExist) {
+      const [check, message] = await guildVoiceManager.check(interaction, {
+        inVoiceChannel: true,
+        inSameChannel: true,
       });
+      if (check) {
+        const playlist = await playlistManager.get(plName);
+        const tracks = await playlistManager.getPlaylistTracks(playlist);
+        const laTracks: Track[] = [];
+        for (let track of tracks) {
+          const laTrack = await trackManager.toLaTrack(
+            track,
+            interaction.member
+          );
+          laTracks.push(laTrack);
+        }
 
-    if (submitted) {
-      await submitted.deferReply();
-      const playlistName = submitted.fields.getTextInputValue("plName");
-      if ((await playlistManager.isExist(playlistName))) {
-        const [check, message] = await guildVoiceManager.check(submitted, {
-          inSameChannel: true,
-          inVoiceChannel: true,
-        });
-        if (check) {
-          const playlist = await playlistManager.get(playlistName);
-          const plTracks = await playlistManager.getPlaylistTracks(playlist);
-          const laTracks: Track[] = [];
-          for (let track of plTracks) {
-            const laTrack = await trackManager.toLaTrack(
-              track,
-              submitted.member
-            );
-            laTracks.push(laTrack);
-          }
-          const isExist = guildVoiceManager.isExist(submitted);
-          let player: Player = null;
-
-          if (isExist) {
-            player = manager.get(interaction.guild.id);
-          } else {
-            const userVoiceChannel =
-              guildVoiceManager.getUserVoiceChannel(submitted);
-            player = manager.create({
-              guild: submitted.guild.id,
-              voiceChannel: userVoiceChannel.id,
-              textChannel: submitted.channel.id,
-              volume: 50,
-              selfDeafen: true,
-            });
-            player.connect();
-          }
-          player.queue.add(laTracks);
-
-          if (!player.playing && !player.paused) {
-            player.play();
-          }
-
-          await playlistManager.modalMessage(submitted, {
-            title: "플레이 리스트가 추가되었습니다.",
-            description: playlist.name,
-            thumbnail: {
-              url: laTracks[0].thumbnail,
-            },
-            footer: {
-              text: submitted.user.tag,
-              iconURL: submitted.user.avatarURL(),
-            },
-          });
-        } else {
-          await playlistManager.modalMessage(submitted, {
-            title: message,
+        if (laTracks.length == 0) {
+          return await playlistManager.sendMessage(interaction, {
+            title: "플레이 리스트가 비어있습니다.",
             color: Colors.Red,
           });
         }
+        const isExist = guildVoiceManager.isExist(interaction);
+        let player: Player = null;
+
+        if (isExist) {
+          player = manager.get(interaction.guild.id);
+        } else {
+          const userVoiceChannel =
+            guildVoiceManager.getUserVoiceChannel(interaction);
+
+          player = manager.create({
+            guild: interaction.guild.id,
+            voiceChannel: userVoiceChannel.id,
+            textChannel: interaction.channel.id,
+            volume: 50,
+            selfDeafen: true,
+          });
+          player.connect();
+        }
+
+        player.queue.add(laTracks);
+
+        if (!player.playing && !player.paused) {
+          player.play();
+        }
+
+        await playlistManager.sendMessage(interaction, {
+          title: "플레이 리스트가 추가되었습니다.",
+          description: playlist.name,
+          thumbnail: {
+            url: laTracks[0].thumbnail,
+          },
+          footer: {
+            text: interaction.user.tag,
+            iconURL: interaction.user.avatarURL(),
+          },
+        });
       } else {
-        await playlistManager.modalMessage(submitted, {
-          title: "존재하지 않는 플레이 리스트 입니다.",
+        await playlistManager.sendMessage(interaction, {
+          title: message,
           color: Colors.Red,
         });
       }
+    } else {
+      await playlistManager.sendMessage(interaction, {
+        title: "플레이 리스트가 없습니다.",
+        color: Colors.Red,
+      });
     }
   },
 };

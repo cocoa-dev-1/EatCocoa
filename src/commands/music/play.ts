@@ -1,10 +1,8 @@
 import { SlashCommandBuilder } from "@discordjs/builders";
 import {
-  APIEmbedImage,
   APIEmbedThumbnail,
   ChatInputCommandInteraction,
   Colors,
-  CommandInteraction,
 } from "discord.js";
 import { Player } from "erela.js";
 import { Container } from "typedi";
@@ -78,7 +76,7 @@ export const playCommand: EcCommand = {
           player.queue.add(result.tracks);
         }
         if (!player.playing && !player.paused) {
-          player.play();
+          await player.play();
         }
         let title = "노래가 추가되었습니다.";
         let description = `[${result.tracks[0].title}](${result.tracks[0].uri})`;
