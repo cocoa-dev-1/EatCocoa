@@ -79,7 +79,7 @@ export const plplayCommand: EcCommand = {
         player.queue.add(laTracks);
 
         if (!player.playing && !player.paused) {
-          player.play();
+          await player.play();
         }
 
         await playlistManager.sendMessage(interaction, {
