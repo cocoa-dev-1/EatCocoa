@@ -1,4 +1,5 @@
 import { EmbedAssetData, EmbedFooterData } from "discord.js";
+import { resolve } from "path";
 
 export const defaultImage =
   "https://cdn.discordapp.com/attachments/990906808099029053/990906847806492682/533c9d51c5b74872.gif";
@@ -11,3 +12,5 @@ export const defaultFooter: EmbedFooterData = {
 export const defaultThumbnail: EmbedAssetData = {
   url: defaultImage,
 };
+
+export const rootPath: string = resolve(__dirname, "..", "..");
